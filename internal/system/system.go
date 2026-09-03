@@ -3,17 +3,19 @@ package system
 import (
 	"github.com/nikhil25803/purrpeek/internal/system/compute"
 	"github.com/nikhil25803/purrpeek/internal/system/memory"
+	"github.com/nikhil25803/purrpeek/internal/system/network"
 	"github.com/nikhil25803/purrpeek/internal/system/platform"
 	"github.com/nikhil25803/purrpeek/internal/system/storage"
 )
 
 type SystemInfo struct {
-	OS         *platform.OSInformation
-	Uptime     *platform.UptimeInformation
-	CPUInfo    *compute.CPUInfo
-	GPUs       []compute.GPUInfo
-	MemoryInfo *memory.MemoryInfo
-	DiskInfo   *storage.DiskInformation
+	OS          *platform.OSInformation
+	Uptime      *platform.UptimeInformation
+	CPUInfo     *compute.CPUInfo
+	GPUs        []compute.GPUInfo
+	MemoryInfo  *memory.MemoryInfo
+	DiskInfo    *storage.DiskInformation
+	NetworkInfo *network.NetworkInfo
 }
 
 func GetSystemInformation() (*SystemInfo, error) {
@@ -45,11 +47,12 @@ func GetSystemInformation() (*SystemInfo, error) {
 	}
 
 	return &SystemInfo{
-		OS:         osInfo,
-		Uptime:     uptimeInfo,
-		CPUInfo:    cpuInfo,
-		GPUs:       gpus,
-		MemoryInfo: memoryInfo,
-		DiskInfo:   diskInfo,
+		OS:          osInfo,
+		Uptime:      uptimeInfo,
+		CPUInfo:     cpuInfo,
+		GPUs:        gpus,
+		MemoryInfo:  memoryInfo,
+		DiskInfo:    diskInfo,
+		NetworkInfo: network.GetNetworkInformation(),
 	}, nil
 }
