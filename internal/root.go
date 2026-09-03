@@ -1,8 +1,11 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
+	"github.com/nikhil25803/purrpeek/internal/system"
 	"github.com/spf13/cobra"
 )
 
@@ -15,17 +18,28 @@ var rootCmd = &cobra.Command{
 	Short: "System information, from a Cat's persepective! Purr Approved.",
 	Long:  `Purrpeek! System information, from a Cat's persepective! Purr Approved.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("purrpeek")
+		info, err := system.GetSystemInformation()
+		if err != nil {
+			return err
+		}
 
 		if jsonOutput {
-			fmt.Println("JSON Output")
+			return printJSON(info)
 		}
 
 		return nil
 	},
 }
 
+func printJSON(data any) error {
+	encoder := json.NewEncoder(os.Stdout)
+	encoder.SetIndent("", "  ")
+
+	return encoder.Encode(data)
+}
+
 func init() {
+
 	rootCmd.Flags().BoolVar(
 		&jsonOutput,
 		"json",
