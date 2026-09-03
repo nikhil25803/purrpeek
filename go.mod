@@ -7,6 +7,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/shirou/gopsutil/v4 v4.26.8
 	github.com/spf13/cobra v1.10.2
+	golang.org/x/term v0.33.0
 )
 
 require (
