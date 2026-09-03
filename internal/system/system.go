@@ -2,14 +2,16 @@ package system
 
 import (
 	"github.com/nikhil25803/purrpeek/internal/system/compute"
+	"github.com/nikhil25803/purrpeek/internal/system/memory"
 	"github.com/nikhil25803/purrpeek/internal/system/platform"
 )
 
 type SystemInfo struct {
-	OS      *platform.OSInformation
-	Uptime  *platform.UptimeInformation
-	CPUInfo *compute.CPUInfo
-	GPUs    []compute.GPUInfo
+	OS         *platform.OSInformation
+	Uptime     *platform.UptimeInformation
+	CPUInfo    *compute.CPUInfo
+	GPUs       []compute.GPUInfo
+	MemoryInfo *memory.MemoryInfo
 }
 
 func GetSystemInformation() (*SystemInfo, error) {
@@ -30,10 +32,16 @@ func GetSystemInformation() (*SystemInfo, error) {
 
 	gpus := compute.GetGPUInformation()
 
+	memoryInfo, err := memory.GetMemoryInformation()
+	if err != nil {
+		return nil, err
+	}
+
 	return &SystemInfo{
-		OS:      osInfo,
-		Uptime:  uptimeInfo,
-		CPUInfo: cpuInfo,
-		GPUs:    gpus,
+		OS:         osInfo,
+		Uptime:     uptimeInfo,
+		CPUInfo:    cpuInfo,
+		GPUs:       gpus,
+		MemoryInfo: memoryInfo,
 	}, nil
 }
