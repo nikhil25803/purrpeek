@@ -26,6 +26,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+
 	rootCmd.Flags().BoolVar(
 		&jsonOutput,
 		"json",
