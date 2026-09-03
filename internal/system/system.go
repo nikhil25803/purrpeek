@@ -4,6 +4,7 @@ import (
 	"github.com/nikhil25803/purrpeek/internal/system/compute"
 	"github.com/nikhil25803/purrpeek/internal/system/memory"
 	"github.com/nikhil25803/purrpeek/internal/system/platform"
+	"github.com/nikhil25803/purrpeek/internal/system/storage"
 )
 
 type SystemInfo struct {
@@ -12,6 +13,7 @@ type SystemInfo struct {
 	CPUInfo    *compute.CPUInfo
 	GPUs       []compute.GPUInfo
 	MemoryInfo *memory.MemoryInfo
+	DiskInfo   *storage.DiskInformation
 }
 
 func GetSystemInformation() (*SystemInfo, error) {
@@ -37,11 +39,17 @@ func GetSystemInformation() (*SystemInfo, error) {
 		return nil, err
 	}
 
+	diskInfo, err := storage.GetDiskInformation()
+	if err != nil {
+		return nil, err
+	}
+
 	return &SystemInfo{
 		OS:         osInfo,
 		Uptime:     uptimeInfo,
 		CPUInfo:    cpuInfo,
 		GPUs:       gpus,
 		MemoryInfo: memoryInfo,
+		DiskInfo:   diskInfo,
 	}, nil
 }
