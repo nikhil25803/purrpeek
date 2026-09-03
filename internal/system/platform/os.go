@@ -9,13 +9,14 @@ import (
 	"os/user"
 	"runtime"
 	"strings"
+
+	"github.com/shirou/gopsutil/v3/host"
 )
 
 type OSInformation struct {
 	Username      string
 	Hostname      string
 	OS            string
-	Kernel        string
 	KernelVersion string
 	Architecture  string
 }
@@ -33,12 +34,12 @@ func GetOSInformation() (*OSInformation, error) {
 
 	osName := runtime.GOOS
 
-	osVersion, err := GetOSVersion(osName)
+	osDetails, err := GetOSDetails(osName)
 	if err != nil {
 		return nil, err
 	}
 
-	kernel, kernelVersion, err := getKernelDetails()
+	kernelVersion, err := host.KernelVersion()
 	if err != nil {
 		return nil, err
 	}
@@ -48,14 +49,13 @@ func GetOSInformation() (*OSInformation, error) {
 	return &OSInformation{
 		Username:      currentUser.Username,
 		Hostname:      hostname,
-		OS:            osVersion,
-		Kernel:        kernel,
+		OS:            osDetails,
 		KernelVersion: kernelVersion,
 		Architecture:  architecture,
 	}, nil
 }
 
-func GetOSVersion(osname string) (string, error) {
+func GetOSDetails(osname string) (string, error) {
 	switch osname {
 	case "windows":
 		return getWindowsVersion()
@@ -66,20 +66,6 @@ func GetOSVersion(osname string) (string, error) {
 	default:
 		return "Other", nil
 	}
-}
-
-func getKernelDetails() (string, string, error) {
-	kernelOutput, err := exec.Command("uname", "-s", "-r").Output()
-	if err != nil {
-		return "", "", fmt.Errorf("failed to get kernel details: %w", err)
-	}
-
-	parts := strings.Fields(string(kernelOutput))
-	if len(parts) < 2 {
-		return "", "", fmt.Errorf("failed to parse kernel details")
-	}
-
-	return parts[0], parts[1], nil
 }
 
 func getLinuxVersion() (string, error) {
