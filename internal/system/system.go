@@ -5,7 +5,8 @@ import (
 )
 
 type SystemInfo struct {
-	OS *platform.OSInformation
+	OS     *platform.OSInformation
+	Uptime *platform.UptimeInformation
 }
 
 func GetSystemInformation() (*SystemInfo, error) {
@@ -14,7 +15,13 @@ func GetSystemInformation() (*SystemInfo, error) {
 		return nil, err
 	}
 
+	uptimeInfo, err := platform.GetUptimeInformation()
+	if err != nil {
+		return nil, err
+	}
+
 	return &SystemInfo{
-		OS: osInfo,
+		OS:     osInfo,
+		Uptime: uptimeInfo,
 	}, nil
 }
