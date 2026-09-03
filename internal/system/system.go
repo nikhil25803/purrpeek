@@ -1,12 +1,14 @@
 package system
 
 import (
+	"github.com/nikhil25803/purrpeek/internal/system/compute"
 	"github.com/nikhil25803/purrpeek/internal/system/platform"
 )
 
 type SystemInfo struct {
-	OS     *platform.OSInformation
-	Uptime *platform.UptimeInformation
+	OS      *platform.OSInformation
+	Uptime  *platform.UptimeInformation
+	CPUInfo *compute.CPUInfo
 }
 
 func GetSystemInformation() (*SystemInfo, error) {
@@ -20,8 +22,14 @@ func GetSystemInformation() (*SystemInfo, error) {
 		return nil, err
 	}
 
+	cpuInfo, err := compute.GetCPUInformation()
+	if err != nil {
+		return nil, err
+	}
+
 	return &SystemInfo{
-		OS:     osInfo,
-		Uptime: uptimeInfo,
+		OS:      osInfo,
+		Uptime:  uptimeInfo,
+		CPUInfo: cpuInfo,
 	}, nil
 }
