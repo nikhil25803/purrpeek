@@ -9,6 +9,7 @@ type SystemInfo struct {
 	OS      *platform.OSInformation
 	Uptime  *platform.UptimeInformation
 	CPUInfo *compute.CPUInfo
+	GPUs    []compute.GPUInfo
 }
 
 func GetSystemInformation() (*SystemInfo, error) {
@@ -27,9 +28,12 @@ func GetSystemInformation() (*SystemInfo, error) {
 		return nil, err
 	}
 
+	gpus := compute.GetGPUInformation()
+
 	return &SystemInfo{
 		OS:      osInfo,
 		Uptime:  uptimeInfo,
 		CPUInfo: cpuInfo,
+		GPUs:    gpus,
 	}, nil
 }
