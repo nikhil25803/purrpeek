@@ -1,4 +1,4 @@
-.PHONY: run-purrpeek build-purrpeek test
+.PHONY: run-purrpeek build-purrpeek test nix-check nix-build
 
 
 run-purrpeek:
@@ -12,3 +12,9 @@ build-purrpeek:
 
 test:
 	go test ./...
+
+nix-check:
+	nix flake check --all-systems
+
+nix-build:
+	nix build

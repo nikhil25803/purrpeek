@@ -54,3 +54,18 @@ jobs:
           cache-dependency-path: go.sum
       - name: Run Windows setup
         run: cmd /c scripts\setup.bat
+
+  nix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - run: make nix-check
+      - run: make nix-build
