@@ -23,13 +23,26 @@ var bayer = [4][4]uint64{
 }
 
 func BrailleImage(output io.Writer, data []byte, columns, rows int) error {
+	lines, err := BrailleLines(data, columns, rows)
+	if err != nil {
+		return err
+	}
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(output, line); err != nil {
+			return fmt.Errorf("render Braille image: %w", err)
+		}
+	}
+	return nil
+}
+
+func BrailleLines(data []byte, columns, rows int) ([]string, error) {
 	if columns < 1 || rows < 1 {
-		return fmt.Errorf("render Braille image: invalid dimensions %dx%d", columns, rows)
+		return nil, fmt.Errorf("render Braille image: invalid dimensions %dx%d", columns, rows)
 	}
 
 	image, err := png.Decode(bytes.NewReader(data))
 	if err != nil {
-		return fmt.Errorf("render Braille image: %w", err)
+		return nil, fmt.Errorf("render Braille image: %w", err)
 	}
 
 	pixelWidth, pixelHeight := columns*2, rows*4
@@ -58,8 +71,9 @@ func BrailleImage(output io.Writer, data []byte, columns, rows int) error {
 		}
 	}
 
+	lines := make([]string, 0, rows)
 	for row := range rows {
-		line := make([]byte, 0, columns*3+1)
+		line := make([]byte, 0, columns*3)
 		for column := range columns {
 			var dots byte
 			for y := range 4 {
@@ -77,10 +91,7 @@ func BrailleImage(output io.Writer, data []byte, columns, rows int) error {
 				line = utf8.AppendRune(line, rune(0x2800)+rune(dots))
 			}
 		}
-		line = append(line, '\n')
-		if _, err := output.Write(line); err != nil {
-			return fmt.Errorf("render Braille image: %w", err)
-		}
+		lines = append(lines, string(line))
 	}
-	return nil
+	return lines, nil
 }

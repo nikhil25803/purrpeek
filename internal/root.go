@@ -21,6 +21,7 @@ import (
 var (
 	jsonOutput bool
 	verbose    bool
+	loadConfig = conf.Load
 )
 
 const (
@@ -36,6 +37,15 @@ var rootCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var config conf.Config
+		if !jsonOutput {
+			var err error
+			config, err = loadConfig()
+			if err != nil {
+				return fmt.Errorf("load configuration: %w", err)
+			}
+		}
+
 		ctx, cancel := context.WithTimeout(cmd.Context(), 5*time.Second)
 		defer cancel()
 
@@ -47,18 +57,24 @@ var rootCmd = &cobra.Command{
 			return printJSON(cmd.OutOrStdout(), render.JSON(info))
 		}
 
-		config, configErr := conf.Load()
 		_, image, imageErr := asset.Select(config.Images)
 		if verbose {
-			if err := errors.Join(collectionErr, configErr, imageErr); err != nil {
+			if err := errors.Join(collectionErr, imageErr); err != nil {
 				fmt.Fprintln(cmd.ErrOrStderr(), diagnosticWarning(err))
 			}
 		}
-		return renderArtwork(cmd.OutOrStdout(), image, os.Getenv)
+		return renderArtwork(cmd.OutOrStdout(), image, info, config.Render, os.Getenv)
 	},
 }
 
-func renderArtwork(output io.Writer, data []byte, getenv func(string) string) error {
+func renderArtwork(output io.Writer, data []byte, info *system.SystemInfo, config conf.RenderConfig, getenv func(string) string) error {
+	panel := render.SystemPanel(info, config)
+	terminalWidth := 0
+	if info != nil && info.Terminal != nil {
+		terminalWidth = info.Terminal.Width
+	}
+	sideBySide := terminalWidth >= imageColumns+4+panel.Width
+
 	var prepared bytes.Buffer
 	var err error
 	switch graphicsProtocol(getenv) {
@@ -67,15 +83,12 @@ func renderArtwork(output io.Writer, data []byte, getenv func(string) string) er
 	case "iterm":
 		err = render.ITermImage(&prepared, data, imageColumns, imageRows)
 	default:
-		return render.BrailleImage(output, data, imageColumns, imageRows)
+		return render.BraillePanel(output, data, imageColumns, imageRows, panel, sideBySide)
 	}
 	if err != nil {
-		return render.BrailleImage(output, data, imageColumns, imageRows)
+		return render.BraillePanel(output, data, imageColumns, imageRows, panel, sideBySide)
 	}
-	if _, err := prepared.WriteTo(output); err != nil {
-		return fmt.Errorf("render artwork: %w", err)
-	}
-	return nil
+	return render.ImagePanel(output, prepared.Bytes(), imageColumns, imageRows, panel, sideBySide)
 }
 
 func graphicsProtocol(getenv func(string) string) string {

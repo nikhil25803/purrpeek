@@ -14,8 +14,8 @@ func TestKittyImage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	commands := strings.Split(strings.TrimSuffix(output.String(), "\r\n"), "\x1b_G")[1:]
-	if len(commands) != 2 || !strings.HasPrefix(commands[0], "a=T,f=100,t=d,c=48,r=24,q=2,m=1;") ||
+	commands := strings.Split(output.String(), "\x1b_G")[1:]
+	if len(commands) != 2 || !strings.HasPrefix(commands[0], "a=T,f=100,t=d,c=48,r=24,C=1,q=2,m=1;") ||
 		!strings.HasPrefix(commands[1], "q=2,m=0;") {
 		t.Fatalf("unexpected Kitty commands: %q", commands)
 	}
@@ -42,7 +42,7 @@ func TestITermImage(t *testing.T) {
 	if err := ITermImage(&output, []byte("png"), 48, 24); err != nil {
 		t.Fatal(err)
 	}
-	want := "\x1b]1337;File=inline=1;size=3;width=48;height=24:cG5n\a\r\n"
+	want := "\x1b]1337;File=inline=1;doNotMoveCursor=1;size=3;width=48;height=24:cG5n\a"
 	if output.String() != want {
 		t.Fatalf("ITermImage() = %q, want %q", output.String(), want)
 	}

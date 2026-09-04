@@ -2,9 +2,13 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/nikhil25803/purrpeek/internal/conf"
+	"github.com/spf13/cobra"
 )
 
 func TestCollectionWarningIsSingleLine(t *testing.T) {
@@ -45,5 +49,48 @@ func TestGraphicsProtocol(t *testing.T) {
 		if got != test.want {
 			t.Fatalf("graphicsProtocol(%v) = %q, want %q", test.environment, got, test.want)
 		}
+	}
+}
+
+func TestPlainOutputRejectsInvalidConfiguration(t *testing.T) {
+	originalLoader, originalJSON := loadConfig, jsonOutput
+	t.Cleanup(func() {
+		loadConfig = originalLoader
+		jsonOutput = originalJSON
+	})
+	loadConfig = func() (conf.Config, error) { return conf.Config{}, errors.New("invalid YAML") }
+	jsonOutput = false
+
+	err := rootCmd.RunE(&cobra.Command{}, nil)
+	if err == nil || !strings.Contains(err.Error(), "load configuration: invalid YAML") {
+		t.Fatalf("plain output error = %v", err)
+	}
+}
+
+func TestJSONDoesNotLoadConfiguration(t *testing.T) {
+	originalLoader, originalJSON := loadConfig, jsonOutput
+	t.Cleanup(func() {
+		loadConfig = originalLoader
+		jsonOutput = originalJSON
+	})
+	called := false
+	loadConfig = func() (conf.Config, error) {
+		called = true
+		return conf.Config{}, errors.New("invalid YAML")
+	}
+	jsonOutput = true
+	var output bytes.Buffer
+	command := &cobra.Command{}
+	command.SetContext(context.Background())
+	command.SetOut(&output)
+
+	if err := rootCmd.RunE(command, nil); err != nil {
+		t.Fatal(err)
+	}
+	if called {
+		t.Fatal("JSON output loaded artwork configuration")
+	}
+	if !strings.HasPrefix(output.String(), "{") {
+		t.Fatalf("JSON output = %q", output.String())
 	}
 }

@@ -24,7 +24,7 @@ func KittyImage(output io.Writer, data []byte, columns, rows int) error {
 
 		control := fmt.Sprintf("q=2,m=%d", boolInt(more))
 		if offset == 0 {
-			control = fmt.Sprintf("a=T,f=100,t=d,c=%d,r=%d,%s", columns, rows, control)
+			control = fmt.Sprintf("a=T,f=100,t=d,c=%d,r=%d,C=1,%s", columns, rows, control)
 		}
 		if _, err := fmt.Fprintf(output, "\x1b_G%s;", control); err != nil {
 			return fmt.Errorf("render Kitty image: %w", err)
@@ -40,9 +40,6 @@ func KittyImage(output io.Writer, data []byte, columns, rows int) error {
 		}
 	}
 
-	if _, err := io.WriteString(output, "\r\n"); err != nil {
-		return fmt.Errorf("render Kitty image: %w", err)
-	}
 	return nil
 }
 
@@ -54,11 +51,11 @@ func ITermImage(output io.Writer, data []byte, columns, rows int) error {
 		return fmt.Errorf("render iTerm image: invalid dimensions %dx%d", columns, rows)
 	}
 
-	if _, err := fmt.Fprintf(output, "\x1b]1337;File=inline=1;size=%d;width=%d;height=%d:%s",
+	if _, err := fmt.Fprintf(output, "\x1b]1337;File=inline=1;doNotMoveCursor=1;size=%d;width=%d;height=%d:%s",
 		len(data), columns, rows, base64.StdEncoding.EncodeToString(data)); err != nil {
 		return fmt.Errorf("render iTerm image: %w", err)
 	}
-	if _, err := io.WriteString(output, "\a\r\n"); err != nil {
+	if _, err := io.WriteString(output, "\a"); err != nil {
 		return fmt.Errorf("render iTerm image: %w", err)
 	}
 	return nil
