@@ -1,14 +1,18 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/nikhil25803/purrpeek/internal/asset"
+	"github.com/nikhil25803/purrpeek/internal/conf"
 	"github.com/nikhil25803/purrpeek/internal/render"
 	"github.com/nikhil25803/purrpeek/internal/system"
 	"github.com/spf13/cobra"
@@ -17,6 +21,11 @@ import (
 var (
 	jsonOutput bool
 	verbose    bool
+)
+
+const (
+	imageColumns = 48
+	imageRows    = 24
 )
 
 var rootCmd = &cobra.Command{
@@ -31,18 +40,59 @@ var rootCmd = &cobra.Command{
 		defer cancel()
 
 		info, collectionErr := system.GetSystemInformation(ctx)
-		if verbose && collectionErr != nil {
-			fmt.Fprintln(cmd.ErrOrStderr(), collectionWarning(collectionErr))
-		}
 		if jsonOutput {
+			if verbose && collectionErr != nil {
+				fmt.Fprintln(cmd.ErrOrStderr(), diagnosticWarning(collectionErr))
+			}
 			return printJSON(cmd.OutOrStdout(), render.JSON(info))
 		}
-		return nil
+
+		config, configErr := conf.Load()
+		_, image, imageErr := asset.Select(config.Images)
+		if verbose {
+			if err := errors.Join(collectionErr, configErr, imageErr); err != nil {
+				fmt.Fprintln(cmd.ErrOrStderr(), diagnosticWarning(err))
+			}
+		}
+		return renderArtwork(cmd.OutOrStdout(), image, os.Getenv)
 	},
 }
 
-func collectionWarning(err error) string {
-	return "warning: partial system information: " + strings.ReplaceAll(err.Error(), "\n", "; ")
+func renderArtwork(output io.Writer, data []byte, getenv func(string) string) error {
+	var prepared bytes.Buffer
+	var err error
+	switch graphicsProtocol(getenv) {
+	case "kitty":
+		err = render.KittyImage(&prepared, data, imageColumns, imageRows)
+	case "iterm":
+		err = render.ITermImage(&prepared, data, imageColumns, imageRows)
+	default:
+		return render.BrailleImage(output, data, imageColumns, imageRows)
+	}
+	if err != nil {
+		return render.BrailleImage(output, data, imageColumns, imageRows)
+	}
+	if _, err := prepared.WriteTo(output); err != nil {
+		return fmt.Errorf("render artwork: %w", err)
+	}
+	return nil
+}
+
+func graphicsProtocol(getenv func(string) string) string {
+	program := strings.ToLower(getenv("TERM_PROGRAM"))
+	term := strings.ToLower(getenv("TERM"))
+	if getenv("KITTY_WINDOW_ID") != "" || getenv("WEZTERM_PANE") != "" ||
+		program == "ghostty" || program == "wezterm" || strings.Contains(term, "kitty") {
+		return "kitty"
+	}
+	if program == "iterm.app" || strings.EqualFold(getenv("LC_TERMINAL"), "iTerm2") {
+		return "iterm"
+	}
+	return ""
+}
+
+func diagnosticWarning(err error) string {
+	return "warning: partial output: " + strings.ReplaceAll(err.Error(), "\n", "; ")
 }
 
 func printJSON(output io.Writer, data any) error {
