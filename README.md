@@ -17,6 +17,7 @@
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
   <a href="https://github.com/nikhil25803/homebrew-tap/blob/main/Formula/purrpeek.rb"><img alt="Homebrew available" src="https://img.shields.io/badge/Homebrew-available-FBB040?logo=homebrew&logoColor=black"></a>
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/flake.nix"><img alt="Nix flake available" src="https://img.shields.io/badge/Nix-flake_available-5277C3?logo=nixos&logoColor=white"></a>
+  <a href="https://github.com/nikhil25803/scoop-bucket/blob/main/bucket/purrpeek.json"><img alt="Scoop available" src="https://img.shields.io/badge/Scoop-available-53B7F5?logo=windows&logoColor=white"></a>
 </p>
 
 Purrpeek is a cross-platform, cat-approved CLI for quickly inspecting your operating system, hardware, storage, network, power, shell, and terminal. It supports macOS, Linux, and Windows.
@@ -39,33 +40,19 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 5. [Configuration](#configuration)
    1. [Purrpeek configuration](#purrpeek-configuration)
    2. [Greeting localization](#greeting-localization)
-6. [Releasing](#releasing)
 
 ## Installation
 
-| Package manager | Commands                                                                                                               |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Homebrew        | `brew install nikhil25803/tap/purrpeek`                                                                                |
-| Nix             | Install: `nix profile install github:nikhil25803/purrpeek`<br>Run: `nix run github:nikhil25803/purrpeek`              |
-| AUR             | Coming soon                                                                                                            |
-| Scoop           | Coming soon                                                                                                            |
-| WinGet          | Coming soon                                                                                                            |
-| Snap            | Coming soon                                                                                                            |
-| Debian          | Coming soon                                                                                                            |
-| Fedora          | Coming soon                                                                                                            |
-
-The Nix package is currently distributed through the repository flake. Install it into your profile, or run it without installing:
-
-```sh
-nix profile install github:nikhil25803/purrpeek
-nix run github:nikhil25803/purrpeek
-```
-
-Publication in the official nixpkgs repository is planned. Once merged, the shorter run command will be:
-
-```sh
-nix run nixpkgs#purrpeek
-```
+| Package manager | Commands                                                                                                                   |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Homebrew        | `brew install nikhil25803/tap/purrpeek`                                                                                    |
+| Nix             | Install: `nix profile install github:nikhil25803/purrpeek`<br><br>Run: `nix run github:nikhil25803/purrpeek`               |
+| AUR             | Coming soon                                                                                                                |
+| Scoop           | Setup: `scoop bucket add nikhil25803 https://github.com/nikhil25803/scoop-bucket`<br><br>Install: `scoop install purrpeek`<br><br>Run: `purrpeek` |
+| WinGet          | Coming soon                                                                                                                |
+| Snap            | Coming soon                                                                                                                |
+| Debian          | Coming soon                                                                                                                |
+| Fedora          | Coming soon                                                                                                                |
 
 ## Local setup
 
@@ -210,29 +197,6 @@ Create an optional `greetings.json` in the user configuration directory to add a
 User entries merge with the bundled catalog by language and period. Phrase arrays for matching periods replace the bundled arrays, while all unspecified translations remain available. Blank and duplicate phrases are removed. Malformed JSON, unsupported period names, control characters, and unreadable files stop the command with an error.
 
 Repository contributors can edit the [bundled greeting catalog](internal/asset/localisation/greetings.json). It is embedded at build time, so run `make build-purrpeek` before testing those changes in `bin/purrpeek`.
-
-## Releasing
-
-GitHub Actions and GoReleaser create release archives and checksums whenever a `v*` tag is pushed. Before each release, move completed entries from [Unreleased](CHANGELOG.md#unreleased) into a dated version in the changelog, commit that change, and then create a lightweight tag:
-
-```sh
-git switch main
-git pull --ff-only
-# Update and commit CHANGELOG.md
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-Use the GitHub CLI to inspect the workflow and published release:
-
-```sh
-gh run list --workflow Release
-gh release view v0.2.0
-gh release view v0.2.0 --web
-gh release download v0.2.0
-```
-
-Do not run `gh release create`: the tag-triggered GoReleaser workflow creates the GitHub release and its assets automatically. Release history is maintained in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
