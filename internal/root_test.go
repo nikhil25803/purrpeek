@@ -2,9 +2,14 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/nikhil25803/purrpeek/internal/conf"
+	"github.com/nikhil25803/purrpeek/internal/localisation"
+	"github.com/spf13/cobra"
 )
 
 func TestCollectionWarningIsSingleLine(t *testing.T) {
@@ -45,5 +50,91 @@ func TestGraphicsProtocol(t *testing.T) {
 		if got != test.want {
 			t.Fatalf("graphicsProtocol(%v) = %q, want %q", test.environment, got, test.want)
 		}
+	}
+}
+
+func TestArtworkSize(t *testing.T) {
+	tests := []struct {
+		name                      string
+		terminalWidth, panelWidth int
+		wantColumns, wantRows     int
+	}{
+		{name: "wide", terminalWidth: 120, panelWidth: 50, wantColumns: 36, wantRows: 18},
+		{name: "constrained", terminalWidth: 80, panelWidth: 50, wantColumns: 26, wantRows: 13},
+		{name: "very narrow", terminalWidth: 40, panelWidth: 50, wantColumns: 8, wantRows: 4},
+		{name: "unknown", terminalWidth: 0, panelWidth: 50, wantColumns: 36, wantRows: 18},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			columns, rows := artworkSize(test.terminalWidth, test.panelWidth)
+			if columns != test.wantColumns || rows != test.wantRows {
+				t.Fatalf("artworkSize(%d, %d) = %dx%d, want %dx%d", test.terminalWidth, test.panelWidth, columns, rows, test.wantColumns, test.wantRows)
+			}
+		})
+	}
+}
+
+func TestPlainOutputRejectsInvalidConfiguration(t *testing.T) {
+	originalLoader, originalJSON := loadConfig, jsonOutput
+	t.Cleanup(func() {
+		loadConfig = originalLoader
+		jsonOutput = originalJSON
+	})
+	loadConfig = func() (conf.Config, error) { return conf.Config{}, errors.New("invalid YAML") }
+	jsonOutput = false
+
+	err := rootCmd.RunE(&cobra.Command{}, nil)
+	if err == nil || !strings.Contains(err.Error(), "load configuration: invalid YAML") {
+		t.Fatalf("plain output error = %v", err)
+	}
+}
+
+func TestPlainOutputRejectsInvalidGreetings(t *testing.T) {
+	originalConfig, originalGreetings, originalJSON := loadConfig, loadGreetings, jsonOutput
+	t.Cleanup(func() {
+		loadConfig = originalConfig
+		loadGreetings = originalGreetings
+		jsonOutput = originalJSON
+	})
+	loadConfig = func() (conf.Config, error) { return conf.Config{}, nil }
+	loadGreetings = func() (localisation.Catalog, error) { return nil, errors.New("invalid JSON") }
+	jsonOutput = false
+
+	err := rootCmd.RunE(&cobra.Command{}, nil)
+	if err == nil || !strings.Contains(err.Error(), "load greetings: invalid JSON") {
+		t.Fatalf("plain output error = %v", err)
+	}
+}
+
+func TestJSONDoesNotLoadConfiguration(t *testing.T) {
+	originalLoader, originalGreetings, originalJSON := loadConfig, loadGreetings, jsonOutput
+	t.Cleanup(func() {
+		loadConfig = originalLoader
+		loadGreetings = originalGreetings
+		jsonOutput = originalJSON
+	})
+	called := false
+	loadConfig = func() (conf.Config, error) {
+		called = true
+		return conf.Config{}, errors.New("invalid YAML")
+	}
+	loadGreetings = func() (localisation.Catalog, error) {
+		called = true
+		return nil, errors.New("invalid greetings")
+	}
+	jsonOutput = true
+	var output bytes.Buffer
+	command := &cobra.Command{}
+	command.SetContext(context.Background())
+	command.SetOut(&output)
+
+	if err := rootCmd.RunE(command, nil); err != nil {
+		t.Fatal(err)
+	}
+	if called {
+		t.Fatal("JSON output loaded artwork configuration")
+	}
+	if !strings.HasPrefix(output.String(), "{") {
+		t.Fatalf("JSON output = %q", output.String())
 	}
 }

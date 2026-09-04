@@ -14,6 +14,13 @@ const DefaultImage = "mongo_no_bg.png"
 //go:embed images/*.png
 var images embed.FS
 
+//go:embed localisation/greetings.json
+var greetingsJSON []byte
+
+func Greetings() []byte {
+	return append([]byte(nil), greetingsJSON...)
+}
+
 func Load(name string) ([]byte, error) {
 	name = strings.TrimSpace(name)
 	if name == "" || strings.ContainsAny(name, `/\`) || path.Base(name) != name || path.Ext(name) != ".png" {
