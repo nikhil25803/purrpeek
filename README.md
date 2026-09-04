@@ -103,6 +103,7 @@ Run the built executable with `./bin/purrpeek` on macOS/Linux or `bin\purrpeek.e
 | `./scripts/setup.sh`                     | Set up, test, and build on macOS or Linux.              |
 | `scripts\setup.bat`                      | Set up, test, and build on Windows.                     |
 | `make test`                              | Run all Go tests.                                       |
+| `make nix-check`                         | Validate and build the package with Nix.                |
 | `make run-purrpeek`                      | Run Purrpeek from source.                               |
 | `make build-purrpeek`                    | Build `bin/purrpeek`.                                   |
 
