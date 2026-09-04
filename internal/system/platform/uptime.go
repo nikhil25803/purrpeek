@@ -1,35 +1,35 @@
 package platform
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"time"
 
-	utils "github.com/nikhil25803/purrpeek/internal/utils"
-	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v4/host"
 )
 
 type UptimeInformation struct {
-	UptimeDuration string
-	BootTime       string
+	DurationSeconds uint64 `json:"durationSeconds"`
+	BootTime        string `json:"bootTime,omitempty"`
 }
 
-func GetUptimeInformation() (*UptimeInformation, error) {
+func GetUptimeInformation(ctx context.Context) (*UptimeInformation, error) {
+	info := &UptimeInformation{}
+	var errs []error
 
-	uptimeSeconds, err := host.Uptime()
+	uptime, err := host.UptimeWithContext(ctx)
 	if err != nil {
-		return nil, err
+		errs = append(errs, fmt.Errorf("duration: %w", err))
+	} else {
+		info.DurationSeconds = uptime
+	}
+	bootTime, err := host.BootTimeWithContext(ctx)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("boot time: %w", err))
+	} else {
+		info.BootTime = time.Unix(int64(bootTime), 0).Format(time.RFC3339)
 	}
 
-	bootTime, err := host.BootTime()
-	if err != nil {
-		return nil, err
-	}
-
-	uptimeDuration := time.Duration(uptimeSeconds) * time.Second
-
-	bootDuration := time.Unix(int64(bootTime), 0)
-
-	return &UptimeInformation{
-		UptimeDuration: utils.FormatDuration(uptimeDuration),
-		BootTime:       bootDuration.Format("2006-01-02 15:04:05"),
-	}, nil
+	return info, errors.Join(errs...)
 }
