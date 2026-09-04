@@ -15,6 +15,7 @@
   <a href="https://github.com/nikhil25803/purrpeek/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/nikhil25803/purrpeek/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/go.mod"><img alt="Go 1.26.5" src="https://img.shields.io/badge/Go-1.26.5-00ADD8?logo=go&logoColor=white"></a>
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+  <a href="https://github.com/nikhil25803/homebrew-tap/blob/main/Formula/purrpeek.rb"><img alt="Homebrew available" src="https://img.shields.io/badge/Homebrew-available-FBB040?logo=homebrew&logoColor=black"></a>
 </p>
 
 Purrpeek is a cross-platform, cat-approved CLI for quickly inspecting your operating system, hardware, storage, network, power, shell, and terminal. It supports macOS, Linux, and Windows.
@@ -30,13 +31,27 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 
 ## Table of contents
 
-1. [Local setup](#local-setup)
-2. [Useful commands](#useful-commands)
-3. [System information](#system-information)
-4. [Configuration](#configuration)
+1. [Installation](#installation)
+2. [Local setup](#local-setup)
+3. [Useful commands](#useful-commands)
+4. [System information](#system-information)
+5. [Configuration](#configuration)
    1. [Purrpeek configuration](#purrpeek-configuration)
    2. [Greeting localization](#greeting-localization)
-5. [Releasing](#releasing)
+6. [Releasing](#releasing)
+
+## Installation
+
+| Package manager | Installation                            |
+| --------------- | --------------------------------------- |
+| Homebrew        | `brew install nikhil25803/tap/purrpeek` |
+| AUR             | Coming soon                             |
+| Scoop           | Coming soon                             |
+| Nix             | Coming soon                             |
+| WinGet          | Coming soon                             |
+| Snap            | Coming soon                             |
+| Debian          | Coming soon                             |
+| Fedora          | Coming soon                             |
 
 ## Local setup
 
@@ -86,7 +101,7 @@ Run the built executable with `./bin/purrpeek` on macOS/Linux or `bin\purrpeek.e
 | `go run ./cmd/purrpeek --json --verbose` | Print JSON and show collection warnings on stderr.      |
 | `go run ./cmd/purrpeek --help`           | Show all CLI flags.                                     |
 | `./scripts/setup.sh`                     | Set up, test, and build on macOS or Linux.              |
-| `scripts\setup.bat`                     | Set up, test, and build on Windows.                     |
+| `scripts\setup.bat`                      | Set up, test, and build on Windows.                     |
 | `make test`                              | Run all Go tests.                                       |
 | `make run-purrpeek`                      | Run Purrpeek from source.                               |
 | `make build-purrpeek`                    | Build `bin/purrpeek`.                                   |
