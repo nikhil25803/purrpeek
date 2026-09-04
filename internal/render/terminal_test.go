@@ -7,7 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/nikhil25803/purrpeek/internal/conf"
+	"github.com/nikhil25803/purrpeek/internal/localisation"
 	"github.com/nikhil25803/purrpeek/internal/system"
 	"github.com/nikhil25803/purrpeek/internal/system/compute"
 	"github.com/nikhil25803/purrpeek/internal/system/environment"
@@ -44,11 +46,13 @@ func TestSystemPanel(t *testing.T) {
 		Terminal:  &environment.TerminalInfo{Name: "ghostty", Version: "1.2"},
 	}
 
-	panel := SystemPanel(info, config)
+	greetings := localisation.Catalog{"en": {Afternoon: []string{"Good afternoon"}}}
+	panel := SystemPanel(info, config, greetings)
 	output := strings.Join(panel.Lines, "\n")
 	for _, want := range []string{
-		yellow + "nikhil@mac" + reset,
-		yellow + "----------" + reset,
+		yellow + "Good afternoon, nikhil" + reset,
+		yellow + "----------------------" + reset,
+		yellow + "Host:" + reset + " " + white + "mac" + reset,
 		yellow + "OS:" + reset + " " + white + "macOS" + reset,
 		"1d 1h 1m 1s", "2026-09-04 15:00:35", white + "IST" + reset,
 		"Apple M4, Other", "16.00 GiB", "69.55%", "15%, 82.5%", "zsh 5.9", "ghostty 1.2",
@@ -60,6 +64,9 @@ func TestSystemPanel(t *testing.T) {
 	if strings.Contains(output, "Kernel:") {
 		t.Fatal("panel rendered an unavailable value")
 	}
+	if strings.Contains(output, "@") {
+		t.Fatalf("hostname leaked into greeting: %s", output)
+	}
 }
 
 func TestSystemPanelHonorsLabelsAndEnabled(t *testing.T) {
@@ -69,10 +76,23 @@ func TestSystemPanelHonorsLabelsAndEnabled(t *testing.T) {
 		Terminal: &environment.TerminalInfo{Name: "ghostty", Term: "xterm-256color"},
 	}, conf.RenderConfig{
 		Terminal: conf.TerminalRender{Term: conf.Field{Name: "TERM Value", Enabled: true}},
-	})
+	}, nil)
 	if len(panel.Lines) != 1 || !strings.Contains(panel.Lines[0], "TERM Value:") ||
 		!strings.Contains(panel.Lines[0], "xterm-256color") {
 		t.Fatalf("only enabled field should render: %q", panel.Lines)
+	}
+}
+
+func TestSystemPanelUsesUnicodeDisplayWidth(t *testing.T) {
+	info := &system.SystemInfo{
+		OS:   &platform.OSInformation{Username: "nikhil"},
+		Time: &platform.TimeInfo{CurrentTime: "2026-09-04T08:00:00+05:30"},
+	}
+	config := conf.RenderConfig{OS: conf.OSRender{Username: conf.Field{Enabled: true}}}
+	panel := SystemPanel(info, config, localisation.Catalog{"hi": {Morning: []string{"शुभ प्रभात"}}})
+	want := runewidth.StringWidth("शुभ प्रभात, nikhil")
+	if panel.Width != want || len(panel.Lines) != 2 {
+		t.Fatalf("Unicode panel width = %d, lines = %d, want %d and 2", panel.Width, len(panel.Lines), want)
 	}
 }
 
@@ -81,26 +101,34 @@ func TestPanelLayouts(t *testing.T) {
 	panel := TerminalPanel{Lines: []string{"details"}, Width: 7}
 
 	var side bytes.Buffer
-	if err := BraillePanel(&side, data, 1, 1, panel, true); err != nil {
+	if err := BraillePanel(&side, data, 1, 1, 1, 1, panel); err != nil {
 		t.Fatal(err)
 	}
-	if got := side.String(); got != "⣿    details\n" {
+	if got := side.String(); got != "\n⣿    details\n\x1b[0m\n" {
 		t.Fatalf("side-by-side panel = %q", got)
 	}
 
-	var stacked bytes.Buffer
-	if err := BraillePanel(&stacked, data, 1, 1, panel, false); err != nil {
-		t.Fatal(err)
-	}
-	if got := stacked.String(); got != "⣿\ndetails\n" {
-		t.Fatalf("stacked panel = %q", got)
-	}
-
 	var raster bytes.Buffer
-	if err := ImagePanel(&raster, []byte("image"), 48, 24, panel, true); err != nil {
+	if err := ImagePanel(&raster, []byte("image"), 8, 4, 36, 18, panel); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(raster.String(), "\x1b[52Cdetails") || strings.Count(raster.String(), "\r\n") != 48 {
+	if !strings.Contains(raster.String(), "\x1b[7B\x1b[14Cimage") ||
+		!strings.Contains(raster.String(), "\x1b[7A\r\x1b[40Cdetails") || strings.Count(raster.String(), "\r\n") != 38 ||
+		!strings.HasPrefix(raster.String(), "\r\n") ||
+		!strings.HasSuffix(raster.String(), reset+"\r\n") {
 		t.Fatalf("raster panel placement = %q", raster.String())
+	}
+}
+
+func TestBraillePanelCentersColumns(t *testing.T) {
+	data := encodePNG(t, image.NewUniform(color.White), image.Rect(0, 0, 2, 4))
+	panel := TerminalPanel{Lines: []string{"one", "two", "three"}, Width: 5}
+	var output bytes.Buffer
+	if err := BraillePanel(&output, data, 1, 1, 5, 3, panel); err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.Split(output.String(), "\n")
+	if lines[0] != "" || lines[1] != "         one" || lines[2] != "  ⣿      two" || lines[3] != "         three" {
+		t.Fatalf("centered lines = %q", lines[:4])
 	}
 }
