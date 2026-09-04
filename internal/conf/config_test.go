@@ -21,7 +21,7 @@ func TestEmbeddedConfig(t *testing.T) {
 		!config.Render.Terminal.Summary.Enabled {
 		t.Fatalf("embedded render defaults were not loaded: %+v", config.Render)
 	}
-	if config.Render.Uptime.BootTime.Enabled || config.Render.CPU.UsagePercent.Enabled ||
+	if config.Render.OS.Hostname.Enabled || config.Render.Uptime.BootTime.Enabled || config.Render.CPU.UsagePercent.Enabled ||
 		config.Render.Memory.Used.Enabled || config.Render.Disk.Volumes.MountPoint.Enabled ||
 		config.Render.Network.Interfaces.Addresses.Enabled || config.Render.Shell.Path.Enabled ||
 		config.Render.Terminal.Term.Enabled {

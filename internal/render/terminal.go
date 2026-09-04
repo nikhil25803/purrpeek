@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/nikhil25803/purrpeek/internal/conf"
+	"github.com/nikhil25803/purrpeek/internal/localisation"
 	"github.com/nikhil25803/purrpeek/internal/system"
 )
 
@@ -23,7 +24,7 @@ type TerminalPanel struct {
 	Width int
 }
 
-func SystemPanel(info *system.SystemInfo, config conf.RenderConfig) TerminalPanel {
+func SystemPanel(info *system.SystemInfo, config conf.RenderConfig, greetings localisation.Catalog) TerminalPanel {
 	if info == nil {
 		return TerminalPanel{}
 	}
@@ -33,7 +34,7 @@ func SystemPanel(info *system.SystemInfo, config conf.RenderConfig) TerminalPane
 		if text == "" {
 			return
 		}
-		panel.Width = max(panel.Width, utf8.RuneCountInString(text))
+		panel.Width = max(panel.Width, runewidth.StringWidth(text))
 		panel.Lines = append(panel.Lines, yellow+text+reset)
 	}
 	add := func(field conf.Field, value string) {
@@ -42,23 +43,21 @@ func SystemPanel(info *system.SystemInfo, config conf.RenderConfig) TerminalPane
 			return
 		}
 		plain := name + ": " + value
-		panel.Width = max(panel.Width, utf8.RuneCountInString(plain))
+		panel.Width = max(panel.Width, runewidth.StringWidth(plain))
 		panel.Lines = append(panel.Lines, yellow+name+":"+reset+" "+white+value+reset)
 	}
 
 	if info.OS != nil {
-		var header []string
-		if config.OS.Username.Enabled && strings.TrimSpace(info.OS.Username) != "" {
-			header = append(header, strings.TrimSpace(info.OS.Username))
-		}
-		if config.OS.Hostname.Enabled && strings.TrimSpace(info.OS.Hostname) != "" {
-			header = append(header, strings.TrimSpace(info.OS.Hostname))
-		}
-		if len(header) > 0 {
-			text := strings.Join(header, "@")
+		if config.OS.Username.Enabled {
+			currentTime := ""
+			if info.Time != nil {
+				currentTime = info.Time.CurrentTime
+			}
+			text := localisation.Greeting(greetings, currentTime, info.OS.Username)
 			addPlain(text)
-			addPlain(strings.Repeat("-", utf8.RuneCountInString(text)))
+			addPlain(strings.Repeat("-", runewidth.StringWidth(text)))
 		}
+		add(config.OS.Hostname, info.OS.Hostname)
 		add(config.OS.Name, info.OS.Name)
 		add(config.OS.Version, info.OS.Version)
 		add(config.OS.Architecture, info.OS.Architecture)
@@ -197,67 +196,76 @@ func appendNonEmpty(values []string, value string) []string {
 	return values
 }
 
-func BraillePanel(output io.Writer, data []byte, columns, rows int, panel TerminalPanel, sideBySide bool) error {
+func BraillePanel(output io.Writer, data []byte, columns, rows, sectionColumns, sectionRows int, panel TerminalPanel) error {
 	art, err := BrailleLines(data, columns, rows)
 	if err != nil {
 		return err
 	}
-	if !sideBySide {
-		for _, line := range append(art, panel.Lines...) {
-			if _, err := fmt.Fprintln(output, line); err != nil {
-				return fmt.Errorf("render panel: %w", err)
-			}
-		}
-		return nil
+	if _, err := io.WriteString(output, "\n"); err != nil {
+		return fmt.Errorf("render panel: %w", err)
 	}
-
-	lineCount := max(len(art), len(panel.Lines))
+	lineCount := max(sectionRows, len(panel.Lines))
+	artTop := (sectionRows - rows) / 2
+	artLeft := (sectionColumns - columns) / 2
 	for index := range lineCount {
-		var line string
-		if index < len(art) {
-			line = art[index]
+		line := ""
+		artIndex := index - artTop
+		if artIndex >= 0 && artIndex < len(art) {
+			line = strings.Repeat(" ", artLeft) + art[artIndex]
 		}
 		if index < len(panel.Lines) {
-			line += strings.Repeat(" ", columns-utf8.RuneCountInString(line)+4) + panel.Lines[index]
+			line += strings.Repeat(" ", sectionColumns-runewidth.StringWidth(line)+4) + panel.Lines[index]
 		}
 		if _, err := fmt.Fprintln(output, line); err != nil {
 			return fmt.Errorf("render panel: %w", err)
 		}
+	}
+	if _, err := io.WriteString(output, reset+"\n"); err != nil {
+		return fmt.Errorf("render panel: %w", err)
 	}
 	return nil
 }
 
-func ImagePanel(output io.Writer, image []byte, columns, rows int, panel TerminalPanel, sideBySide bool) error {
-	if sideBySide {
-		if _, err := fmt.Fprintf(output, "\x1b[s%s\x1b[u", strings.Repeat("\r\n", rows)); err != nil {
+func ImagePanel(output io.Writer, image []byte, columns, rows, sectionColumns, sectionRows int, panel TerminalPanel) error {
+	lineCount := max(sectionRows, len(panel.Lines))
+	artTop := (sectionRows - rows) / 2
+	artLeft := (sectionColumns - columns) / 2
+	if _, err := fmt.Fprintf(output, "\r\n\r%s\x1b[%dA", strings.Repeat("\r\n", lineCount), lineCount); err != nil {
+		return fmt.Errorf("render panel: %w", err)
+	}
+	if artTop > 0 {
+		if _, err := fmt.Fprintf(output, "\x1b[%dB", artTop); err != nil {
 			return fmt.Errorf("render panel: %w", err)
 		}
-		if _, err := output.Write(image); err != nil {
-			return fmt.Errorf("render artwork: %w", err)
-		}
-		for _, line := range panel.Lines {
-			if _, err := fmt.Fprintf(output, "\x1b[%dC%s\r\n", columns+4, line); err != nil {
-				return fmt.Errorf("render panel: %w", err)
-			}
-		}
-		if remaining := rows - len(panel.Lines); remaining > 0 {
-			if _, err := io.WriteString(output, strings.Repeat("\r\n", remaining)); err != nil {
-				return fmt.Errorf("render panel: %w", err)
-			}
-		}
-		return nil
 	}
-
+	if artLeft > 0 {
+		if _, err := fmt.Fprintf(output, "\x1b[%dC", artLeft); err != nil {
+			return fmt.Errorf("render panel: %w", err)
+		}
+	}
 	if _, err := output.Write(image); err != nil {
 		return fmt.Errorf("render artwork: %w", err)
 	}
-	if _, err := io.WriteString(output, strings.Repeat("\r\n", rows)); err != nil {
+	if _, err := io.WriteString(output, "\r"); err != nil {
 		return fmt.Errorf("render panel: %w", err)
 	}
-	for _, line := range panel.Lines {
-		if _, err := fmt.Fprintln(output, line); err != nil {
+	if artTop > 0 {
+		if _, err := fmt.Fprintf(output, "\x1b[%dA", artTop); err != nil {
 			return fmt.Errorf("render panel: %w", err)
 		}
+	}
+	for _, line := range panel.Lines {
+		if _, err := fmt.Fprintf(output, "\r\x1b[%dC%s\r\n", sectionColumns+4, line); err != nil {
+			return fmt.Errorf("render panel: %w", err)
+		}
+	}
+	if remaining := lineCount - len(panel.Lines); remaining > 0 {
+		if _, err := io.WriteString(output, strings.Repeat("\r\n", remaining)); err != nil {
+			return fmt.Errorf("render panel: %w", err)
+		}
+	}
+	if _, err := io.WriteString(output, reset+"\r\n"); err != nil {
+		return fmt.Errorf("render panel: %w", err)
 	}
 	return nil
 }

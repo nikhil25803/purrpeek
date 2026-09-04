@@ -11,7 +11,7 @@ render:
     hostname:
       name: Host
       description: System hostname
-      enabled: true
+      enabled: false
     name:
       name: OS
       description: Operating system

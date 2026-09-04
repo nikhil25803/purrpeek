@@ -4,6 +4,7 @@ go 1.26.5
 
 require (
 	github.com/jaypipes/ghw v0.25.0
+	github.com/mattn/go-runewidth v0.0.29
 	github.com/shirou/gopsutil/v4 v4.26.8
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.33.0
@@ -11,6 +12,7 @@ require (
 )
 
 require (
+	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
 	github.com/ebitengine/purego v0.10.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
