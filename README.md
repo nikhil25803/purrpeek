@@ -16,6 +16,7 @@
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/go.mod"><img alt="Go 1.26.5" src="https://img.shields.io/badge/Go-1.26.5-00ADD8?logo=go&logoColor=white"></a>
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
   <a href="https://github.com/nikhil25803/homebrew-tap/blob/main/Formula/purrpeek.rb"><img alt="Homebrew available" src="https://img.shields.io/badge/Homebrew-available-FBB040?logo=homebrew&logoColor=black"></a>
+  <a href="https://github.com/nikhil25803/purrpeek/blob/main/flake.nix"><img alt="Nix flake available" src="https://img.shields.io/badge/Nix-flake_available-5277C3?logo=nixos&logoColor=white"></a>
 </p>
 
 Purrpeek is a cross-platform, cat-approved CLI for quickly inspecting your operating system, hardware, storage, network, power, shell, and terminal. It supports macOS, Linux, and Windows.
@@ -42,16 +43,29 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 
 ## Installation
 
-| Package manager | Installation                            |
-| --------------- | --------------------------------------- |
-| Homebrew        | `brew install nikhil25803/tap/purrpeek` |
-| AUR             | Coming soon                             |
-| Scoop           | Coming soon                             |
-| Nix             | Coming soon                             |
-| WinGet          | Coming soon                             |
-| Snap            | Coming soon                             |
-| Debian          | Coming soon                             |
-| Fedora          | Coming soon                             |
+| Package manager | Commands                                                                                                               |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Homebrew        | `brew install nikhil25803/tap/purrpeek`                                                                                |
+| Nix             | Install: `nix profile install github:nikhil25803/purrpeek`<br>Run: `nix run github:nikhil25803/purrpeek`              |
+| AUR             | Coming soon                                                                                                            |
+| Scoop           | Coming soon                                                                                                            |
+| WinGet          | Coming soon                                                                                                            |
+| Snap            | Coming soon                                                                                                            |
+| Debian          | Coming soon                                                                                                            |
+| Fedora          | Coming soon                                                                                                            |
+
+The Nix package is currently distributed through the repository flake. Install it into your profile, or run it without installing:
+
+```sh
+nix profile install github:nikhil25803/purrpeek
+nix run github:nikhil25803/purrpeek
+```
+
+Publication in the official nixpkgs repository is planned. Once merged, the shorter run command will be:
+
+```sh
+nix run nixpkgs#purrpeek
+```
 
 ## Local setup
 
