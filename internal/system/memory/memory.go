@@ -1,32 +1,28 @@
 package memory
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
 type MemoryInfo struct {
-	RAMTotal     string
-	RAMUsed      string
-	RAMAvailable string
-	RAMFree      string
-	RAMUsage     string
+	TotalBytes     uint64  `json:"totalBytes"`
+	UsedBytes      uint64  `json:"usedBytes"`
+	AvailableBytes uint64  `json:"availableBytes"`
+	UsedPercent    float64 `json:"usedPercent"`
 }
 
-func GetMemoryInformation() (*MemoryInfo, error) {
-	vmStat, err := mem.VirtualMemory()
+func GetMemoryInformation(ctx context.Context) (*MemoryInfo, error) {
+	stat, err := mem.VirtualMemoryWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	const GB = 1024 * 1024 * 1024
-
 	return &MemoryInfo{
-		RAMTotal:     fmt.Sprintf("%.2f GB", float64(vmStat.Total)/GB),
-		RAMUsed:      fmt.Sprintf("%.2f GB", float64(vmStat.Used)/GB),
-		RAMAvailable: fmt.Sprintf("%.2f GB", float64(vmStat.Available)/GB),
-		RAMFree:      fmt.Sprintf("%.2f GB", float64(vmStat.Free)/GB),
-		RAMUsage:     fmt.Sprintf("%.2f%%", vmStat.UsedPercent),
+		TotalBytes:     stat.Total,
+		UsedBytes:      stat.Used,
+		AvailableBytes: stat.Available,
+		UsedPercent:    stat.UsedPercent,
 	}, nil
 }

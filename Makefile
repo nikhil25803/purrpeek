@@ -1,4 +1,4 @@
-.PHONY: run-purrpeek build-purrpeek
+.PHONY: run-purrpeek build-purrpeek test
 
 
 run-purrpeek:
@@ -9,3 +9,6 @@ run-purrpeek:
 build-purrpeek:
 	@echo "Building purrpeek..."
 	go build -o bin/purrpeek cmd/purrpeek/main.go
+
+test:
+	go test ./...
