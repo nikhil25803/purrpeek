@@ -64,6 +64,26 @@ go build -o bin/purrpeek.exe ./cmd/purrpeek
 
 Warnings are written to standard error only when `--verbose` is enabled, so JSON output remains usable by other tools.
 
+## Image configuration
+
+Purrpeek randomly selects one bundled image from `purrpeek-conf.yaml`:
+
+```yaml
+images:
+  - mongo_no_bg.png
+  - snow_no_bg.png
+```
+
+Place the file under `purrpeek/` in your operating system's user configuration directory:
+
+| Platform | Configuration file |
+| --- | --- |
+| macOS | `~/Library/Application Support/purrpeek/purrpeek-conf.yaml` |
+| Linux | `$XDG_CONFIG_HOME/purrpeek/purrpeek-conf.yaml` (normally `~/.config/purrpeek/purrpeek-conf.yaml`) |
+| Windows | `%AppData%\purrpeek\purrpeek-conf.yaml` |
+
+Available images are `mongo_no_bg.png`, `mongo_purrpeek.png`, `snow_no_bg.png`, and `snow_purrpeek.png`. Missing or invalid configuration falls back to the bundled defaults.
+
 ## System information
 
 | Category         | Information provided                                                                      |
