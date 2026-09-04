@@ -1,63 +1,65 @@
 package system
 
 import (
+	"context"
+	"errors"
+	"fmt"
+
 	"github.com/nikhil25803/purrpeek/internal/system/compute"
 	"github.com/nikhil25803/purrpeek/internal/system/environment"
 	"github.com/nikhil25803/purrpeek/internal/system/memory"
 	"github.com/nikhil25803/purrpeek/internal/system/network"
 	"github.com/nikhil25803/purrpeek/internal/system/platform"
+	"github.com/nikhil25803/purrpeek/internal/system/power"
 	"github.com/nikhil25803/purrpeek/internal/system/storage"
 )
 
 type SystemInfo struct {
-	OS           *platform.OSInformation
-	Uptime       *platform.UptimeInformation
-	CPUInfo      *compute.CPUInfo
-	GPUs         []compute.GPUInfo
-	MemoryInfo   *memory.MemoryInfo
-	DiskInfo     *storage.DiskInformation
-	NetworkInfo  *network.NetworkInfo
-	ShellInfo    *environment.ShellInfo
-	TerminalInfo *environment.TerminalInfo
+	OS        *platform.OSInformation     `json:"os,omitempty"`
+	Uptime    *platform.UptimeInformation `json:"uptime,omitempty"`
+	Time      *platform.TimeInfo          `json:"time,omitempty"`
+	CPU       *compute.CPUInfo            `json:"cpu,omitempty"`
+	GPUs      []compute.GPUInfo           `json:"gpus"`
+	Memory    *memory.MemoryInfo          `json:"memory,omitempty"`
+	Disk      *storage.DiskInformation    `json:"disk,omitempty"`
+	Network   *network.NetworkInfo        `json:"network,omitempty"`
+	Batteries []power.BatteryInfo         `json:"batteries"`
+	Shell     *environment.ShellInfo      `json:"shell,omitempty"`
+	Terminal  *environment.TerminalInfo   `json:"terminal,omitempty"`
 }
 
-func GetSystemInformation() (*SystemInfo, error) {
-	osInfo, err := platform.GetOSInformation()
-	if err != nil {
-		return nil, err
+func GetSystemInformation(ctx context.Context) (*SystemInfo, error) {
+	info := &SystemInfo{
+		Time:      platform.GetTimeInformation(),
+		GPUs:      []compute.GPUInfo{},
+		Batteries: []power.BatteryInfo{},
+		Shell:     environment.GetShellInformation(ctx),
+		Terminal:  environment.GetTerminalInformation(),
+	}
+	var errs []error
+	collect := func(component string, err error) {
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s: %w", component, err))
+		}
 	}
 
-	uptimeInfo, err := platform.GetUptimeInformation()
-	if err != nil {
-		return nil, err
-	}
+	var err error
+	info.OS, err = platform.GetOSInformation(ctx)
+	collect("os", err)
+	info.Uptime, err = platform.GetUptimeInformation(ctx)
+	collect("uptime", err)
+	info.CPU, err = compute.GetCPUInformation(ctx)
+	collect("cpu", err)
+	info.GPUs, err = compute.GetGPUInformation(ctx)
+	collect("gpus", err)
+	info.Memory, err = memory.GetMemoryInformation(ctx)
+	collect("memory", err)
+	info.Disk, err = storage.GetDiskInformation(ctx)
+	collect("disk", err)
+	info.Network, err = network.GetNetworkInformation()
+	collect("network", err)
+	info.Batteries, err = power.GetBatteryInformation(ctx)
+	collect("batteries", err)
 
-	cpuInfo, err := compute.GetCPUInformation()
-	if err != nil {
-		return nil, err
-	}
-
-	gpus := compute.GetGPUInformation()
-
-	memoryInfo, err := memory.GetMemoryInformation()
-	if err != nil {
-		return nil, err
-	}
-
-	diskInfo, err := storage.GetDiskInformation()
-	if err != nil {
-		return nil, err
-	}
-
-	return &SystemInfo{
-		OS:           osInfo,
-		Uptime:       uptimeInfo,
-		CPUInfo:      cpuInfo,
-		GPUs:         gpus,
-		MemoryInfo:   memoryInfo,
-		DiskInfo:     diskInfo,
-		NetworkInfo:  network.GetNetworkInformation(),
-		ShellInfo:    environment.GetShellInformation(),
-		TerminalInfo: environment.GetTerminalInformation(),
-	}, nil
+	return info, errors.Join(errs...)
 }

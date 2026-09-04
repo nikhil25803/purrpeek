@@ -1,8 +1,12 @@
 package network
 
 import (
+	"errors"
+	"fmt"
 	"net"
 	"os"
+	"slices"
+	"strings"
 )
 
 const (
@@ -11,40 +15,46 @@ const (
 )
 
 type NetworkInterface struct {
-	Name       string
-	Addresses  []string
-	MACAddress string
-	MTU        int
+	Name       string   `json:"name"`
+	Addresses  []string `json:"addresses"`
+	MACAddress string   `json:"macAddress,omitempty"`
+	MTU        int      `json:"mtu"`
 }
 
 type NetworkInfo struct {
-	Hostname         string
-	PrimaryInterface string
-	LocalIPv4        string
-	LocalIPv6        string
-	MACAddress       string
-	Interfaces       []NetworkInterface
+	Hostname         string             `json:"hostname,omitempty"`
+	PrimaryInterface string             `json:"primaryInterface,omitempty"`
+	LocalIPv4        string             `json:"localIPv4,omitempty"`
+	LocalIPv6        string             `json:"localIPv6,omitempty"`
+	MACAddress       string             `json:"macAddress,omitempty"`
+	Interfaces       []NetworkInterface `json:"interfaces"`
 }
 
-func GetNetworkInformation() *NetworkInfo {
+func GetNetworkInformation() (*NetworkInfo, error) {
 	info := &NetworkInfo{Interfaces: []NetworkInterface{}}
-	info.Hostname, _ = os.Hostname()
+	var errs []error
+	if hostname, err := os.Hostname(); err != nil {
+		errs = append(errs, fmt.Errorf("hostname: %w", err))
+	} else {
+		info.Hostname = hostname
+	}
 
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		return info
+		errs = append(errs, err)
+		return info, errors.Join(errs...)
 	}
 
+	skipped := 0
 	for _, networkInterface := range interfaces {
 		if networkInterface.Flags&net.FlagUp == 0 || networkInterface.Flags&net.FlagLoopback != 0 {
 			continue
 		}
-
 		addresses, err := networkInterface.Addrs()
 		if err != nil {
+			skipped++
 			continue
 		}
-
 		usableAddresses := make([]string, 0, len(addresses))
 		for _, address := range addresses {
 			ip, _, err := net.ParseCIDR(address.String())
@@ -55,7 +65,7 @@ func GetNetworkInformation() *NetworkInfo {
 		if len(usableAddresses) == 0 {
 			continue
 		}
-
+		slices.Sort(usableAddresses)
 		info.Interfaces = append(info.Interfaces, NetworkInterface{
 			Name:       networkInterface.Name,
 			Addresses:  usableAddresses,
@@ -63,12 +73,21 @@ func GetNetworkInformation() *NetworkInfo {
 			MTU:        networkInterface.MTU,
 		})
 	}
+	if skipped > 0 {
+		errs = append(errs, fmt.Errorf("%d interface(s) unavailable", skipped))
+	}
+	slices.SortFunc(info.Interfaces, func(a, b NetworkInterface) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 
 	if primary := findPrimaryInterface(info.Interfaces); primary != nil {
 		info.PrimaryInterface = primary.Name
 		info.MACAddress = primary.MACAddress
 		for _, address := range primary.Addresses {
-			ip, _, _ := net.ParseCIDR(address)
+			ip, _, err := net.ParseCIDR(address)
+			if err != nil {
+				continue
+			}
 			if ip.To4() != nil && info.LocalIPv4 == "" {
 				info.LocalIPv4 = ip.String()
 			} else if ip.To4() == nil && info.LocalIPv6 == "" {
@@ -76,8 +95,7 @@ func GetNetworkInformation() *NetworkInfo {
 			}
 		}
 	}
-
-	return info
+	return info, errors.Join(errs...)
 }
 
 func findPrimaryInterface(interfaces []NetworkInterface) *NetworkInterface {
@@ -87,14 +105,13 @@ func findPrimaryInterface(interfaces []NetworkInterface) *NetworkInterface {
 	} {
 		for index := range interfaces {
 			for _, address := range interfaces[index].Addresses {
-				ip, _, _ := net.ParseCIDR(address)
-				if routeIP != nil && routeIP.Equal(ip) {
+				ip, _, err := net.ParseCIDR(address)
+				if err == nil && routeIP != nil && routeIP.Equal(ip) {
 					return &interfaces[index]
 				}
 			}
 		}
 	}
-
 	if len(interfaces) > 0 {
 		return &interfaces[0]
 	}
@@ -102,14 +119,10 @@ func findPrimaryInterface(interfaces []NetworkInterface) *NetworkInterface {
 }
 
 func localRouteIP(network, destination string) net.IP {
-	connection, err := net.DialUDP(network, nil, &net.UDPAddr{
-		IP:   net.ParseIP(destination),
-		Port: 9,
-	})
+	connection, err := net.DialUDP(network, nil, &net.UDPAddr{IP: net.ParseIP(destination), Port: 9})
 	if err != nil {
 		return nil
 	}
 	defer connection.Close()
-
 	return connection.LocalAddr().(*net.UDPAddr).IP
 }

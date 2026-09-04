@@ -1,51 +1,66 @@
 package compute
 
 import (
-	"math"
+	"context"
+	"errors"
+	"fmt"
+	"time"
 
 	"github.com/shirou/gopsutil/v4/cpu"
 )
 
+const cpuSampleDuration = 200 * time.Millisecond
+
 type CPUInfo struct {
-	CPUModel      string
-	PhysicalCores int
-	LogicalCores  int
-	CPUUsage      float64
-	CPUFrequency  float64
+	Model         string   `json:"model,omitempty"`
+	PhysicalCores int      `json:"physicalCores"`
+	LogicalCores  int      `json:"logicalCores"`
+	UsagePercent  float64  `json:"usagePercent"`
+	FrequencyMHz  *float64 `json:"frequencyMHz,omitempty"`
 }
 
-func GetCPUInformation() (*CPUInfo, error) {
+func GetCPUInformation(ctx context.Context) (*CPUInfo, error) {
+	info := &CPUInfo{}
+	var errs []error
 
-	cpuInfo, err := cpu.Info()
+	stats, err := cpu.InfoWithContext(ctx)
 	if err != nil {
-		return nil, err
+		errs = append(errs, fmt.Errorf("hardware information: %w", err))
+	} else {
+		model, frequency, err := cpuHardware(stats)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("hardware information: %w", err))
+		} else {
+			info.Model = model
+			info.FrequencyMHz = frequency
+		}
 	}
 
-	logicalCores, err := cpu.Counts(true)
+	if info.LogicalCores, err = cpu.CountsWithContext(ctx, true); err != nil {
+		errs = append(errs, fmt.Errorf("logical cores: %w", err))
+	}
+	if info.PhysicalCores, err = cpu.CountsWithContext(ctx, false); err != nil {
+		errs = append(errs, fmt.Errorf("physical cores: %w", err))
+	}
+	percentages, err := cpu.PercentWithContext(ctx, cpuSampleDuration, false)
 	if err != nil {
-		return nil, err
+		errs = append(errs, fmt.Errorf("usage: %w", err))
+	} else if len(percentages) == 0 {
+		errs = append(errs, errors.New("usage: no CPU returned"))
+	} else {
+		info.UsagePercent = percentages[0]
 	}
 
-	physicalCores, err := cpu.Counts(false)
-	if err != nil {
-		return nil, err
-	}
+	return info, errors.Join(errs...)
+}
 
-	cpuPercentages, err := cpu.Percent(0, false)
-	if err != nil {
-		return nil, err
+func cpuHardware(stats []cpu.InfoStat) (string, *float64, error) {
+	if len(stats) == 0 {
+		return "", nil, errors.New("no CPU returned")
 	}
-
-	cpuFrequency, err := cpu.Info()
-	if err != nil {
-		return nil, err
+	if stats[0].Mhz < 100 {
+		return stats[0].ModelName, nil, nil
 	}
-
-	return &CPUInfo{
-		CPUModel:      cpuInfo[0].ModelName,
-		PhysicalCores: physicalCores,
-		LogicalCores:  logicalCores,
-		CPUUsage:      math.Round(cpuPercentages[0]*100) / 100,
-		CPUFrequency:  cpuFrequency[0].Mhz,
-	}, nil
+	frequency := stats[0].Mhz
+	return stats[0].ModelName, &frequency, nil
 }
