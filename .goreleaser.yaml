@@ -1,0 +1,48 @@
+version: 2
+
+project_name: purrpeek
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: purrpeek
+    main: ./cmd/purrpeek
+    binary: purrpeek
+
+    goos:
+      - darwin
+      - linux
+      - windows
+
+    goarch:
+      - amd64
+      - arm64
+
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  github:
+    owner: nikhil25803
+    name: purrpeek
+
+  draft: false
+  prerelease: auto
