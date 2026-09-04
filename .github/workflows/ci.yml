@@ -30,7 +30,10 @@ jobs:
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
-      - run: go build ./cmd/purrpeek
+      - name: Build Purrpeek
+        run: go build ./cmd/purrpeek
+      - name: Run Purrpeek
+        run: ./purrpeek
 
   build-linux:
     runs-on: ubuntu-latest
@@ -41,7 +44,10 @@ jobs:
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
-      - run: go build ./cmd/purrpeek
+      - name: Build Purrpeek
+        run: go build ./cmd/purrpeek
+      - name: Run Purrpeek
+        run: ./purrpeek
 
   build-windows:
     runs-on: windows-latest
@@ -54,6 +60,9 @@ jobs:
           cache-dependency-path: go.sum
       - name: Run Windows setup
         run: cmd /c scripts\setup.bat
+      - name: Run Purrpeek
+        shell: pwsh
+        run: .\bin\purrpeek.exe
 
   nix:
     strategy:
@@ -69,3 +78,32 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - run: make nix-check
       - run: make nix-build
+      - name: Run Purrpeek
+        run: ./result/bin/purrpeek
+
+  scoop:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Install Scoop
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+          Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+          "$env:USERPROFILE\scoop\shims" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Add Purrpeek bucket
+        shell: pwsh
+        run: |
+          scoop bucket add nikhil25803 https://github.com/nikhil25803/scoop-bucket
+
+      - name: Install Purrpeek
+        shell: pwsh
+        run: |
+          scoop install purrpeek
+
+      - name: Run Purrpeek
+        shell: pwsh
+        run: |
+          purrpeek
