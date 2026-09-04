@@ -7,12 +7,12 @@ import (
 )
 
 type TerminalInfo struct {
-	Name      string
-	Version   string
-	Term      string
-	ColorTerm string
-	Width     int
-	Height    int
+	Name      string `json:"name,omitempty"`
+	Version   string `json:"version,omitempty"`
+	Term      string `json:"term,omitempty"`
+	ColorTerm string `json:"colorTerm,omitempty"`
+	Width     int    `json:"width"`
+	Height    int    `json:"height"`
 }
 
 func GetTerminalInformation() *TerminalInfo {

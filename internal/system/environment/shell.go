@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path"
@@ -12,12 +13,12 @@ import (
 var versionPattern = regexp.MustCompile(`\d+(?:\.\d+)+`)
 
 type ShellInfo struct {
-	Name    string
-	Version string
-	Path    string
+	Name    string `json:"name,omitempty"`
+	Version string `json:"version,omitempty"`
+	Path    string `json:"path,omitempty"`
 }
 
-func GetShellInformation() *ShellInfo {
+func GetShellInformation(ctx context.Context) *ShellInfo {
 	shellPath := configuredShell(runtime.GOOS, os.Getenv)
 	if shellPath != "" {
 		if resolvedPath, err := exec.LookPath(shellPath); err == nil {
@@ -28,7 +29,7 @@ func GetShellInformation() *ShellInfo {
 	name := shellName(shellPath)
 	return &ShellInfo{
 		Name:    name,
-		Version: shellVersion(shellPath, name),
+		Version: shellVersion(ctx, shellPath, name),
 		Path:    shellPath,
 	}
 }
@@ -54,12 +55,12 @@ func shellName(shellPath string) string {
 	return name
 }
 
-func shellVersion(shellPath, name string) string {
+func shellVersion(ctx context.Context, shellPath, name string) string {
 	if shellPath == "" {
 		return ""
 	}
 
-	output, err := exec.Command(shellPath, shellVersionArgs(name)...).CombinedOutput()
+	output, err := exec.CommandContext(ctx, shellPath, shellVersionArgs(name)...).CombinedOutput()
 	if err != nil {
 		return ""
 	}
