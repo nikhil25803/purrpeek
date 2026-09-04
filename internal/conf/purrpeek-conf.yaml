@@ -1,3 +1,231 @@
 images:
   - mongo_no_bg.png
   - snow_no_bg.png
+
+render:
+  os:
+    username:
+      name: User
+      description: Current user
+      enabled: true
+    hostname:
+      name: Host
+      description: System hostname
+      enabled: false
+    name:
+      name: OS
+      description: Operating system
+      enabled: true
+    version:
+      name: Version
+      description: Operating system version
+      enabled: true
+    architecture:
+      name: Arch
+      description: System architecture
+      enabled: true
+    kernelVersion:
+      name: Kernel
+      description: Kernel version
+      enabled: true
+  uptime:
+    duration:
+      name: Uptime
+      description: Time since boot
+      enabled: true
+    bootTime:
+      name: Boot Time
+      description: Time the system last started
+      enabled: false
+  time:
+    currentTime:
+      name: Time
+      description: Current local time
+      enabled: true
+    timeZone:
+      name: Timezone
+      description: Active timezone
+      enabled: true
+    utcOffset:
+      name: UTC Offset
+      description: Offset from UTC
+      enabled: false
+  cpu:
+    model:
+      name: CPU
+      description: Processor model
+      enabled: true
+    physicalCores:
+      name: Physical Cores
+      description: Number of physical CPU cores
+      enabled: false
+    logicalCores:
+      name: Logical Cores
+      description: Number of logical CPU cores
+      enabled: false
+    usagePercent:
+      name: CPU Usage
+      description: Current processor usage
+      enabled: false
+    frequencyMHz:
+      name: CPU Frequency
+      description: Processor frequency in MHz
+      enabled: false
+  gpus:
+    models:
+      name: GPU
+      description: Graphics processor models
+      enabled: true
+  memory:
+    total:
+      name: Memory
+      description: Total memory
+      enabled: true
+    used:
+      name: Memory Used
+      description: Used memory
+      enabled: false
+    available:
+      name: Memory Available
+      description: Available memory
+      enabled: false
+    usedPercent:
+      name: Memory Usage
+      description: Used memory percentage
+      enabled: true
+  disk:
+    homeUsage:
+      total:
+        name: Disk
+        description: Total home volume capacity
+        enabled: true
+      used:
+        name: Disk Used
+        description: Used home volume capacity
+        enabled: false
+      free:
+        name: Disk Free
+        description: Free home volume capacity
+        enabled: false
+      usedPercent:
+        name: Disk Usage
+        description: Used home volume percentage
+        enabled: true
+    volumes:
+      fileSystem:
+        name: Volume Filesystems
+        description: Filesystems of mounted volumes
+        enabled: false
+      mountPoint:
+        name: Volume Mounts
+        description: Mount points of mounted volumes
+        enabled: false
+      total:
+        name: Volume Totals
+        description: Total capacity of mounted volumes
+        enabled: false
+      used:
+        name: Volume Used
+        description: Used capacity of mounted volumes
+        enabled: false
+      free:
+        name: Volume Free
+        description: Free capacity of mounted volumes
+        enabled: false
+      usedPercent:
+        name: Volume Usage
+        description: Used percentages of mounted volumes
+        enabled: false
+  network:
+    hostname:
+      name: Network Host
+      description: Network hostname
+      enabled: false
+    primaryInterface:
+      name: Primary Interface
+      description: Primary network interface
+      enabled: false
+    localIPv4:
+      name: IPv4
+      description: Local IPv4 address
+      enabled: true
+    localIPv6:
+      name: IPv6
+      description: Local IPv6 address
+      enabled: false
+    macAddress:
+      name: MAC
+      description: Primary interface MAC address
+      enabled: false
+    interfaces:
+      name:
+        name: Interfaces
+        description: Network interface names
+        enabled: false
+      addresses:
+        name: Interface Addresses
+        description: Addresses assigned to network interfaces
+        enabled: false
+      macAddress:
+        name: Interface MACs
+        description: MAC addresses of network interfaces
+        enabled: false
+      mtu:
+        name: Interface MTUs
+        description: MTUs of network interfaces
+        enabled: false
+  batteries:
+    names:
+      name: Batteries
+      description: Battery names
+      enabled: false
+    percentages:
+      name: Battery
+      description: Battery charge percentages
+      enabled: true
+  shell:
+    summary:
+      name: Shell
+      description: Shell name and version
+      enabled: true
+    name:
+      name: Shell Name
+      description: Shell name
+      enabled: false
+    version:
+      name: Shell Version
+      description: Shell version
+      enabled: false
+    path:
+      name: Shell Path
+      description: Shell executable path
+      enabled: false
+  terminal:
+    summary:
+      name: Terminal
+      description: Terminal name and version
+      enabled: true
+    name:
+      name: Terminal Name
+      description: Terminal name
+      enabled: false
+    version:
+      name: Terminal Version
+      description: Terminal version
+      enabled: false
+    term:
+      name: TERM
+      description: TERM environment value
+      enabled: false
+    colorTerm:
+      name: COLORTERM
+      description: COLORTERM environment value
+      enabled: false
+    width:
+      name: Terminal Width
+      description: Terminal width in columns
+      enabled: false
+    height:
+      name: Terminal Height
+      description: Terminal height in rows
+      enabled: false

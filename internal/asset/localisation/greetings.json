@@ -1,0 +1,50 @@
+{
+  "en": {
+    "morning": ["Good morning"],
+    "afternoon": ["Good afternoon"],
+    "evening": ["Good evening"],
+    "night": ["Good night"]
+  },
+  "hi": {
+    "morning": ["सुप्रभात", "शुभ प्रभात"],
+    "afternoon": ["नमस्कार"],
+    "evening": ["शुभ संध्या"],
+    "night": ["शुभ रात्रि"]
+  },
+  "bn": {
+    "morning": ["সুপ্রভাত"],
+    "afternoon": ["শুভ অপরাহ্ন"],
+    "evening": ["শুভ সন্ধ্যা"],
+    "night": ["শুভ রাত্রি"]
+  },
+  "es": {
+    "morning": ["Buenos días"],
+    "afternoon": ["Buenas tardes"],
+    "evening": ["Buenas noches"],
+    "night": ["Buenas noches"]
+  },
+  "fr": {
+    "morning": ["Bonjour"],
+    "afternoon": ["Bonjour"],
+    "evening": ["Bonsoir"],
+    "night": ["Bonne nuit"]
+  },
+  "bho": {
+    "morning": ["राम राम"],
+    "afternoon": ["राम राम"],
+    "evening": ["राम राम"],
+    "night": ["शुभ राति"]
+  },
+  "mr": {
+    "morning": ["शुभ प्रभात"],
+    "afternoon": ["नमस्कार"],
+    "evening": ["शुभ संध्याकाळ"],
+    "night": ["शुभ रात्री"]
+  },
+  "pa": {
+    "morning": ["ਸ਼ੁਭ ਸਵੇਰ"],
+    "afternoon": ["ਸਤ ਸ੍ਰੀ ਅਕਾਲ"],
+    "evening": ["ਸ਼ੁਭ ਸ਼ਾਮ"],
+    "night": ["ਸ਼ੁਭ ਰਾਤਰੀ"]
+  }
+}

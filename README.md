@@ -82,7 +82,24 @@ Place the file under `purrpeek/` in your operating system's user configuration d
 | Linux | `$XDG_CONFIG_HOME/purrpeek/purrpeek-conf.yaml` (normally `~/.config/purrpeek/purrpeek-conf.yaml`) |
 | Windows | `%AppData%\purrpeek\purrpeek-conf.yaml` |
 
-Available images are `mongo_no_bg.png`, `mongo_purrpeek.png`, `snow_no_bg.png`, and `snow_purrpeek.png`. Missing or invalid configuration falls back to the bundled defaults.
+Available images are `mongo_no_bg.png`, `mongo_purrpeek.png`, `snow_no_bg.png`, and `snow_purrpeek.png`. A missing configuration uses the bundled defaults; malformed or unreadable configuration stops the command with an error.
+
+## Greeting localization
+
+Purrpeek randomly selects a greeting language on each run. To add a language or replace phrases for an existing language, create `greetings.json` beside `purrpeek-conf.yaml` in the platform-specific configuration directory above:
+
+```json
+{
+  "de": {
+    "morning": ["Guten Morgen"],
+    "afternoon": ["Guten Tag"],
+    "evening": ["Guten Abend"],
+    "night": ["Gute Nacht"]
+  }
+}
+```
+
+The supported periods are `morning`, `afternoon`, `evening`, and `night`. User phrases replace the matching language and period while all other bundled translations remain available. The file is optional, but malformed or unreadable greeting files stop the command with an error.
 
 ## System information
 

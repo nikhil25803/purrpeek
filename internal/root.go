@@ -13,19 +13,24 @@ import (
 
 	"github.com/nikhil25803/purrpeek/internal/asset"
 	"github.com/nikhil25803/purrpeek/internal/conf"
+	"github.com/nikhil25803/purrpeek/internal/localisation"
 	"github.com/nikhil25803/purrpeek/internal/render"
 	"github.com/nikhil25803/purrpeek/internal/system"
 	"github.com/spf13/cobra"
 )
 
 var (
-	jsonOutput bool
-	verbose    bool
+	jsonOutput    bool
+	verbose       bool
+	loadConfig    = conf.Load
+	loadGreetings = localisation.Load
 )
 
 const (
-	imageColumns = 48
-	imageRows    = 24
+	imageMinColumns = 8
+	imageMaxColumns = 36
+	imageMaxRows    = 18
+	imageGap        = 4
 )
 
 var rootCmd = &cobra.Command{
@@ -36,6 +41,20 @@ var rootCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var config conf.Config
+		var greetings localisation.Catalog
+		if !jsonOutput {
+			var err error
+			config, err = loadConfig()
+			if err != nil {
+				return fmt.Errorf("load configuration: %w", err)
+			}
+			greetings, err = loadGreetings()
+			if err != nil {
+				return fmt.Errorf("load greetings: %w", err)
+			}
+		}
+
 		ctx, cancel := context.WithTimeout(cmd.Context(), 5*time.Second)
 		defer cancel()
 
@@ -47,18 +66,24 @@ var rootCmd = &cobra.Command{
 			return printJSON(cmd.OutOrStdout(), render.JSON(info))
 		}
 
-		config, configErr := conf.Load()
 		_, image, imageErr := asset.Select(config.Images)
 		if verbose {
-			if err := errors.Join(collectionErr, configErr, imageErr); err != nil {
+			if err := errors.Join(collectionErr, imageErr); err != nil {
 				fmt.Fprintln(cmd.ErrOrStderr(), diagnosticWarning(err))
 			}
 		}
-		return renderArtwork(cmd.OutOrStdout(), image, os.Getenv)
+		return renderArtwork(cmd.OutOrStdout(), image, info, config.Render, greetings, os.Getenv)
 	},
 }
 
-func renderArtwork(output io.Writer, data []byte, getenv func(string) string) error {
+func renderArtwork(output io.Writer, data []byte, info *system.SystemInfo, config conf.RenderConfig, greetings localisation.Catalog, getenv func(string) string) error {
+	panel := render.SystemPanel(info, config, greetings)
+	terminalWidth := 0
+	if info != nil && info.Terminal != nil {
+		terminalWidth = info.Terminal.Width
+	}
+	imageColumns, imageRows := artworkSize(terminalWidth, panel.Width)
+
 	var prepared bytes.Buffer
 	var err error
 	switch graphicsProtocol(getenv) {
@@ -67,15 +92,20 @@ func renderArtwork(output io.Writer, data []byte, getenv func(string) string) er
 	case "iterm":
 		err = render.ITermImage(&prepared, data, imageColumns, imageRows)
 	default:
-		return render.BrailleImage(output, data, imageColumns, imageRows)
+		return render.BraillePanel(output, data, imageColumns, imageRows, imageMaxColumns, imageMaxRows, panel)
 	}
 	if err != nil {
-		return render.BrailleImage(output, data, imageColumns, imageRows)
+		return render.BraillePanel(output, data, imageColumns, imageRows, imageMaxColumns, imageMaxRows, panel)
 	}
-	if _, err := prepared.WriteTo(output); err != nil {
-		return fmt.Errorf("render artwork: %w", err)
+	return render.ImagePanel(output, prepared.Bytes(), imageColumns, imageRows, imageMaxColumns, imageMaxRows, panel)
+}
+
+func artworkSize(terminalWidth, panelWidth int) (int, int) {
+	columns := imageMaxColumns
+	if terminalWidth > 0 {
+		columns = max(imageMinColumns, min(imageMaxColumns, terminalWidth-panelWidth-imageGap))
 	}
-	return nil
+	return columns, (columns + 1) / 2
 }
 
 func graphicsProtocol(getenv func(string) string) string {
