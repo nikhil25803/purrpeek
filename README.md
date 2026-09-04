@@ -36,6 +36,7 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 4. [Configuration](#configuration)
    1. [Purrpeek configuration](#purrpeek-configuration)
    2. [Greeting localization](#greeting-localization)
+5. [Releasing](#releasing)
 
 ## Local setup
 
@@ -44,31 +45,36 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 - [Git](https://git-scm.com/)
 - [Go 1.26.5](https://go.dev/dl/) or a compatible version
 
-Clone the repository and download its dependencies:
+Clone the repository:
 
 ```sh
 git clone https://github.com/nikhil25803/purrpeek.git
 cd purrpeek
+```
+
+Set up, test, and build the project without Make:
+
+```sh
+# macOS and Linux
+./scripts/setup.sh
+
+# Windows Command Prompt
+scripts\setup.bat
+```
+
+The scripts download dependencies, run all tests, and build the executable under `bin/`. To perform the same steps manually:
+
+```sh
 go mod download
-```
-
-Run the tests and start Purrpeek:
-
-```sh
 go test ./...
-go run ./cmd/purrpeek
-go run ./cmd/purrpeek --json
-```
-
-Build a local binary:
-
-```sh
 # macOS and Linux
 go build -o bin/purrpeek ./cmd/purrpeek
 
 # Windows
 go build -o bin/purrpeek.exe ./cmd/purrpeek
 ```
+
+Run the built executable with `./bin/purrpeek` on macOS/Linux or `bin\purrpeek.exe` on Windows.
 
 ## Useful commands
 
@@ -79,6 +85,8 @@ go build -o bin/purrpeek.exe ./cmd/purrpeek
 | `go run ./cmd/purrpeek --verbose`        | Render normally and show collection warnings on stderr. |
 | `go run ./cmd/purrpeek --json --verbose` | Print JSON and show collection warnings on stderr.      |
 | `go run ./cmd/purrpeek --help`           | Show all CLI flags.                                     |
+| `./scripts/setup.sh`                     | Set up, test, and build on macOS or Linux.              |
+| `scripts\setup.bat`                     | Set up, test, and build on Windows.                     |
 | `make test`                              | Run all Go tests.                                       |
 | `make run-purrpeek`                      | Run Purrpeek from source.                               |
 | `make build-purrpeek`                    | Build `bin/purrpeek`.                                   |
@@ -172,6 +180,29 @@ Create an optional `greetings.json` in the user configuration directory to add a
 User entries merge with the bundled catalog by language and period. Phrase arrays for matching periods replace the bundled arrays, while all unspecified translations remain available. Blank and duplicate phrases are removed. Malformed JSON, unsupported period names, control characters, and unreadable files stop the command with an error.
 
 Repository contributors can edit the [bundled greeting catalog](internal/asset/localisation/greetings.json). It is embedded at build time, so run `make build-purrpeek` before testing those changes in `bin/purrpeek`.
+
+## Releasing
+
+GitHub Actions and GoReleaser create release archives and checksums whenever a `v*` tag is pushed. Before each release, move completed entries from [Unreleased](CHANGELOG.md#unreleased) into a dated version in the changelog, commit that change, and then create a lightweight tag:
+
+```sh
+git switch main
+git pull --ff-only
+# Update and commit CHANGELOG.md
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+Use the GitHub CLI to inspect the workflow and published release:
+
+```sh
+gh run list --workflow Release
+gh release view v0.2.0
+gh release view v0.2.0 --web
+gh release download v0.2.0
+```
+
+Do not run `gh release create`: the tag-triggered GoReleaser workflow creates the GitHub release and its assets automatically. Release history is maintained in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
