@@ -1,23 +1,41 @@
-<div align="center">
+<pre align="center">
 
-<pre>
-                                       _
- _ __  _   _ _ __ _ __ _ __   ___  ___| | __
-| '_ \| | | | '__| '__| '_ \ / _ \/ _ \ |/ /
-| |_) | |_| | |  | |  | |_) |  __/  __/   &lt;
-| .__/ \__,_|_|  |_|  | .__/ \___|\___|_|\_\
-|_|                   |_|
+   _                                          _    
+  | |                                        | |   
+ / __)  _ __  _   _ _ __ _ __ _ __   ___  ___| | __
+ \__ \ | '_ \| | | | '__| '__| '_ \ / _ \/ _ \ |/ /
+ (   / | |_) | |_| | |  | |  | |_) |  __/  __/   < 
+  |_|  | .__/ \__,_|_|  |_|  | .__/ \___|\___|_|\_\
+       | |                   | |                   
+       |_|                   |_|                   
+
 </pre>
 
-<a href="https://github.com/nikhil25803/purrpeek/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/nikhil25803/purrpeek/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-<a href="https://github.com/nikhil25803/purrpeek/blob/main/go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/nikhil25803/purrpeek?logo=go"></a>
-<a href="https://github.com/nikhil25803/purrpeek/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/nikhil25803/purrpeek"></a>
+<p align="center">
+  <a href="https://github.com/nikhil25803/purrpeek/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/nikhil25803/purrpeek/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/nikhil25803/purrpeek/blob/main/go.mod"><img alt="Go 1.26.5" src="https://img.shields.io/badge/Go-1.26.5-00ADD8?logo=go&logoColor=white"></a>
+  <a href="https://github.com/nikhil25803/purrpeek/blob/main/LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+</p>
 
-</div>
+Purrpeek is a cross-platform, cat-approved CLI for quickly inspecting your operating system, hardware, storage, network, power, shell, and terminal. It supports macOS, Linux, and Windows.
 
-Purrpeek is a cross-platform CLI that gives you a quick, cat-approved view of your operating system, hardware, storage, network, power, shell, and terminal. It supports macOS, Linux, and Windows.
+Collection is best-effort: if a system detail is unavailable, Purrpeek still displays everything it collected successfully.
 
-System collection is best-effort: if a detail is unavailable, Purrpeek returns the rest of the report instead of failing the entire command.
+|                                                   Preview 1                                                    |                                                   Preview 2                                                   |
+| :------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
+|            **Ghostty**<br>![Purrpeek running in Ghostty with Mongo artwork](asset/ss_ghostty_1.png)            |            **Ghostty**<br>![Purrpeek running in Ghostty with Snow artwork](asset/ss_ghostty_2.png)            |
+| **macOS Terminal**<br>![Purrpeek Braille output in macOS Terminal with Mongo artwork](asset/ss_mac_term_1.png) | **macOS Terminal**<br>![Purrpeek Braille output in macOS Terminal with Snow artwork](asset/ss_mac_term_2.png) |
+
+> **Note:** Images are rendered in terminals with supported image protocols, other terminals use the Braille fallback.
+
+## Table of contents
+
+1. [Local setup](#local-setup)
+2. [Useful commands](#useful-commands)
+3. [System information](#system-information)
+4. [Configuration](#configuration)
+   1. [Purrpeek configuration](#purrpeek-configuration)
+   2. [Greeting localization](#greeting-localization)
 
 ## Local setup
 
@@ -34,10 +52,11 @@ cd purrpeek
 go mod download
 ```
 
-Run the tests and start Purrpeek from source:
+Run the tests and start Purrpeek:
 
 ```sh
 go test ./...
+go run ./cmd/purrpeek
 go run ./cmd/purrpeek --json
 ```
 
@@ -53,40 +72,91 @@ go build -o bin/purrpeek.exe ./cmd/purrpeek
 
 ## Useful commands
 
-| Command                                  | Description                         |
-| ---------------------------------------- | ----------------------------------- |
-| `go run ./cmd/purrpeek --json`           | Print the system report as JSON.    |
-| `go run ./cmd/purrpeek --json --verbose` | Print JSON and collection warnings. |
-| `go run ./cmd/purrpeek --help`           | Show all CLI flags.                 |
-| `make test`                              | Run all Go tests.                   |
-| `make run-purrpeek`                      | Run Purrpeek from source.           |
-| `make build-purrpeek`                    | Build `bin/purrpeek`.               |
+| Command                                  | Description                                             |
+| ---------------------------------------- | ------------------------------------------------------- |
+| `go run ./cmd/purrpeek`                  | Render artwork and system details.                      |
+| `go run ./cmd/purrpeek --json`           | Print the complete system report as JSON.               |
+| `go run ./cmd/purrpeek --verbose`        | Render normally and show collection warnings on stderr. |
+| `go run ./cmd/purrpeek --json --verbose` | Print JSON and show collection warnings on stderr.      |
+| `go run ./cmd/purrpeek --help`           | Show all CLI flags.                                     |
+| `make test`                              | Run all Go tests.                                       |
+| `make run-purrpeek`                      | Run Purrpeek from source.                               |
+| `make build-purrpeek`                    | Build `bin/purrpeek`.                                   |
 
-Warnings are written to standard error only when `--verbose` is enabled, so JSON output remains usable by other tools.
+Warnings are quiet by default and written to standard error only with `--verbose`, keeping JSON output usable by other tools.
 
-## Image configuration
+## System information
 
-Purrpeek randomly selects one bundled image from `purrpeek-conf.yaml`:
+| Category         | Information provided                                                                |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| Operating system | Username, hostname, OS name and version, kernel version, and architecture           |
+| Uptime           | Human-readable uptime and boot time                                                 |
+| Time             | Local time, timezone, and UTC offset                                                |
+| CPU              | Model, physical and logical core counts, usage, and optional frequency              |
+| GPU              | Detected graphics processor models                                                  |
+| Memory           | Total, used, and available memory with usage percentage                             |
+| Disk             | Home usage, mounted volumes, filesystems, mount points, capacity, and usage         |
+| Network          | Primary interface, IPv4 and IPv6 addresses, MAC address, MTU, and interface details |
+| Batteries        | Battery names and charge percentages when present                                   |
+| Shell            | Name, version, and executable path                                                  |
+| Terminal         | Name, version, `TERM`, `COLORTERM`, width, and height                               |
+
+## Configuration
+
+Purrpeek reads optional user files from the platform configuration directory:
+
+| Platform | Purrpeek configuration                                      | Greeting localization                                   |
+| -------- | ----------------------------------------------------------- | ------------------------------------------------------- |
+| macOS    | `~/Library/Application Support/purrpeek/purrpeek-conf.yaml` | `~/Library/Application Support/purrpeek/greetings.json` |
+| Linux    | `$XDG_CONFIG_HOME/purrpeek/purrpeek-conf.yaml`              | `$XDG_CONFIG_HOME/purrpeek/greetings.json`              |
+| Windows  | `%AppData%\purrpeek\purrpeek-conf.yaml`                     | `%AppData%\purrpeek\greetings.json`                     |
+
+On Linux, `$XDG_CONFIG_HOME` is normally `~/.config`. User configuration is read on every invocation, so these files do not require rebuilding Purrpeek.
+
+### Purrpeek configuration
+
+The YAML configuration controls which bundled images may be selected and which system fields appear in normal terminal output:
 
 ```yaml
 images:
   - mongo_no_bg.png
   - snow_no_bg.png
+
+render:
+  cpu:
+    model:
+      name: CPU
+      description: Processor model
+      enabled: true
 ```
 
-Place the file under `purrpeek/` in your operating system's user configuration directory:
+For each render field:
 
-| Platform | Configuration file |
-| --- | --- |
-| macOS | `~/Library/Application Support/purrpeek/purrpeek-conf.yaml` |
-| Linux | `$XDG_CONFIG_HOME/purrpeek/purrpeek-conf.yaml` (normally `~/.config/purrpeek/purrpeek-conf.yaml`) |
-| Windows | `%AppData%\purrpeek\purrpeek-conf.yaml` |
+- `name` is the label displayed in the terminal.
+- `description` documents what the field contains.
+- `enabled` decides whether the field is rendered.
 
-Available images are `mongo_no_bg.png`, `mongo_purrpeek.png`, `snow_no_bg.png`, and `snow_purrpeek.png`. A missing configuration uses the bundled defaults; malformed or unreadable configuration stops the command with an error.
+The user file is merged over the [embedded defaults](internal/conf/purrpeek-conf.yaml), so it only needs to contain values you want to change. Purrpeek randomly chooses from valid configured image names. Malformed YAML, unknown fields, and unreadable configuration files stop the command with a concise error.
 
-## Greeting localization
+Repository contributors can change the embedded YAML or add images under `internal/asset/images/`. Because these files are embedded in the executable, rebuild afterward:
 
-Purrpeek randomly selects a greeting language on each run. To add a language or replace phrases for an existing language, create `greetings.json` beside `purrpeek-conf.yaml` in the platform-specific configuration directory above:
+```sh
+make build-purrpeek
+./bin/purrpeek
+```
+
+### Greeting localization
+
+Purrpeek chooses a random available language and greeting on each run. The local time selects one of four periods:
+
+| Period      | Local time  |
+| ----------- | ----------- |
+| `morning`   | 05:00–11:59 |
+| `afternoon` | 12:00–16:59 |
+| `evening`   | 17:00–20:59 |
+| `night`     | 21:00–04:59 |
+
+Create an optional `greetings.json` in the user configuration directory to add a language or replace phrases for an existing language and period:
 
 ```json
 {
@@ -99,23 +169,9 @@ Purrpeek randomly selects a greeting language on each run. To add a language or 
 }
 ```
 
-The supported periods are `morning`, `afternoon`, `evening`, and `night`. User phrases replace the matching language and period while all other bundled translations remain available. The file is optional, but malformed or unreadable greeting files stop the command with an error.
+User entries merge with the bundled catalog by language and period. Phrase arrays for matching periods replace the bundled arrays, while all unspecified translations remain available. Blank and duplicate phrases are removed. Malformed JSON, unsupported period names, control characters, and unreadable files stop the command with an error.
 
-## System information
-
-| Category         | Information provided                                                                      |
-| ---------------- | ----------------------------------------------------------------------------------------- |
-| Operating system | Username, hostname, OS name and version, kernel version, and architecture                 |
-| Uptime           | Human-readable uptime and boot time                                                       |
-| Time             | Local time, timezone, and UTC offset                                                      |
-| CPU              | Model, physical and logical core counts, usage, and frequency when available              |
-| GPU              | Detected graphics processor models                                                        |
-| Memory           | Total, used, and available memory with usage percentage                                   |
-| Disk             | Home usage, mounted volumes, filesystems, mount points, capacity, and usage               |
-| Network          | Primary interface, local IPv4 and IPv6 addresses, MAC address, MTU, and interface details |
-| Batteries        | Battery names and charge percentages when present                                         |
-| Shell            | Name, version, and executable path                                                        |
-| Terminal         | Name, version, `TERM`, `COLORTERM`, width, and height                                     |
+Repository contributors can edit the [bundled greeting catalog](internal/asset/localisation/greetings.json). It is embedded at build time, so run `make build-purrpeek` before testing those changes in `bin/purrpeek`.
 
 ## License
 
