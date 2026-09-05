@@ -129,7 +129,7 @@ jobs:
 
       - name: Install Debian package
         run: |
-          sudo apt install -y ./dist/purrpeek_*.deb
+          sudo apt install -y ./dist/*_linux_amd64.deb
 
       - name: Verify installation
         run: |
