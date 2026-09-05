@@ -18,6 +18,8 @@
   <a href="https://github.com/nikhil25803/homebrew-tap/blob/main/Formula/purrpeek.rb"><img alt="Homebrew available" src="https://img.shields.io/badge/Homebrew-available-FBB040?logo=homebrew&logoColor=black"></a>
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/flake.nix"><img alt="Nix flake available" src="https://img.shields.io/badge/Nix-flake_available-5277C3?logo=nixos&logoColor=white"></a>
   <a href="https://github.com/nikhil25803/scoop-bucket/blob/main/bucket/purrpeek.json"><img alt="Scoop available" src="https://img.shields.io/badge/Scoop-available-53B7F5?logo=windows&logoColor=white"></a>
+  <a href="#linux-installer"><img alt="Linux installer available" src="https://img.shields.io/badge/Linux-installer_available-FCC624?logo=linux&logoColor=black"></a>
+  <a href="#installation"><img alt="Debian package coming soon" src="https://img.shields.io/badge/Debian-coming_soon-A81D33?logo=debian&logoColor=white"></a>
 </p>
 
 Purrpeek is a cross-platform, cat-approved CLI for quickly inspecting your operating system, hardware, storage, network, power, shell, and terminal. It supports macOS, Linux, and Windows.
@@ -29,19 +31,23 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 |            **Ghostty**<br>![Purrpeek running in Ghostty with Mongo artwork](asset/ss_ghostty_1.png)            |            **Ghostty**<br>![Purrpeek running in Ghostty with Snow artwork](asset/ss_ghostty_2.png)            |
 | **macOS Terminal**<br>![Purrpeek Braille output in macOS Terminal with Mongo artwork](asset/ss_mac_term_1.png) | **macOS Terminal**<br>![Purrpeek Braille output in macOS Terminal with Snow artwork](asset/ss_mac_term_2.png) |
 
-> **Note:** Images are rendered in terminals with supported image protocols, other terminals use the Braille fallback.
+> **Note:** Images are rendered in terminals with supported image protocols; other terminals use the Braille fallback.
 
 ## Table of contents
 
 1. [Installation](#installation)
+   1. [Linux installer](#linux-installer)
+   1. [Release archives](#release-archives)
 2. [Local setup](#local-setup)
-3. [Useful commands](#useful-commands)
-4. [System information](#system-information)
-5. [Configuration](#configuration)
+   1. [Prerequisites](#prerequisites)
+3. [CLI usage](#cli-usage)
+4. [Development commands](#development-commands)
+5. [Package builds](#package-builds)
+6. [System information](#system-information)
+7. [Configuration](#configuration)
    1. [Purrpeek configuration](#purrpeek-configuration)
    2. [Greeting localization](#greeting-localization)
-
-## Installation
+8. [License](#license)
 
 ## Installation
 
@@ -55,6 +61,27 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 | Debian          | Coming soon                                                                                                                                       |
 | Fedora          | Coming soon                                                                                                                                       |
 | Snap            | Coming soon                                                                                                                                       |
+
+### Linux installer
+
+Install the latest release on Linux (amd64 or arm64):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/nikhil25803/purrpeek/main/scripts/install.sh | sh
+```
+
+The script verifies the release checksum and installs `purrpeek` to `/usr/local/bin`, using `sudo` when required. Review [the installer](scripts/install.sh) before running it if you prefer not to pipe a remote script directly into a shell.
+
+### Release archives
+
+Download the archive for your operating system and architecture from [GitHub Releases](https://github.com/nikhil25803/purrpeek/releases). On Linux or macOS, extract it and install the binary:
+
+```sh
+tar -xzf purrpeek_<version>_<os>_<arch>.tar.gz
+sudo install -m 755 purrpeek /usr/local/bin/purrpeek
+```
+
+Windows releases are provided as `.zip` archives. Extract `purrpeek.exe` and place it in a directory on `PATH`.
 
 ## Local setup
 
@@ -94,23 +121,42 @@ go build -o bin/purrpeek.exe ./cmd/purrpeek
 
 Run the built executable with `./bin/purrpeek` on macOS/Linux or `bin\purrpeek.exe` on Windows.
 
-## Useful commands
+## CLI usage
 
-| Command                                  | Description                                             |
-| ---------------------------------------- | ------------------------------------------------------- |
-| `go run ./cmd/purrpeek`                  | Render artwork and system details.                      |
-| `go run ./cmd/purrpeek --json`           | Print the complete system report as JSON.               |
-| `go run ./cmd/purrpeek --verbose`        | Render normally and show collection warnings on stderr. |
-| `go run ./cmd/purrpeek --json --verbose` | Print JSON and show collection warnings on stderr.      |
-| `go run ./cmd/purrpeek --help`           | Show all CLI flags.                                     |
-| `./scripts/setup.sh`                     | Set up, test, and build on macOS or Linux.              |
-| `scripts\setup.bat`                      | Set up, test, and build on Windows.                     |
-| `make test`                              | Run all Go tests.                                       |
-| `make nix-check`                         | Validate and build the package with Nix.                |
-| `make run-purrpeek`                      | Run Purrpeek from source.                               |
-| `make build-purrpeek`                    | Build `bin/purrpeek`.                                   |
+| Command                      | Description                                             |
+| ---------------------------- | ------------------------------------------------------- |
+| `purrpeek`                   | Render artwork and system details.                      |
+| `purrpeek --json`            | Print the complete system report as JSON.               |
+| `purrpeek --verbose`         | Render normally and show collection warnings on stderr. |
+| `purrpeek --json --verbose`  | Print JSON and show collection warnings on stderr.      |
+| `purrpeek --help`            | Show all CLI flags.                                     |
 
 Warnings are quiet by default and written to standard error only with `--verbose`, keeping JSON output usable by other tools.
+
+From the repository, use `go run ./cmd/purrpeek` in place of `purrpeek` or run `make run-purrpeek`.
+
+## Development commands
+
+| Command                 | Description                                |
+| ----------------------- | ------------------------------------------ |
+| `./scripts/setup.sh`    | Set up, test, and build on macOS or Linux. |
+| `scripts\setup.bat`     | Set up, test, and build on Windows.        |
+| `make test`             | Run all Go tests.                          |
+| `make run-purrpeek`     | Run Purrpeek from source.                  |
+| `make build-purrpeek`   | Build `bin/purrpeek`.                      |
+| `make build-windows`    | Build `bin/purrpeek.exe` for Windows.      |
+
+## Package builds
+
+Nix commands require Nix; AUR and Debian commands require Docker.
+
+| Command          | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| `make nix-check` | Validate the flake on all supported systems.                 |
+| `make nix-build` | Build the package with Nix.                                  |
+| `make aur-check` | Build the x86_64 AUR package interactively.                  |
+| `make aur-build` | Build the x86_64 AUR package.                                |
+| `make deb-build` | Build the amd64 Debian package and place artifacts in `dist/`. |
 
 ## System information
 
