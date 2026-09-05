@@ -35,3 +35,23 @@ go.work.sum
 dist/
 bin/
 result
+
+# Debian packaging artifacts
+debian/.debhelper/
+debian/purrpeek/
+debian/files
+debian/*.substvars
+debian/debhelper-build-stamp
+*.deb
+*.buildinfo
+*.changes
+
+*.deb
+*.buildinfo
+*.changes
+
+debian/.debhelper/
+debian/purrpeek/
+debian/files
+debian/*.substvars
+debian/debhelper-build-stamp
