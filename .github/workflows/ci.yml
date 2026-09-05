@@ -49,6 +49,18 @@ jobs:
       - name: Run Purrpeek
         run: ./purrpeek
 
+  install-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install latest Linux release
+        run: sh scripts/install.sh
+      - name: Verify installation
+        run: |
+          command -v purrpeek
+          purrpeek --help
+
   build-windows:
     runs-on: windows-latest
     timeout-minutes: 10
