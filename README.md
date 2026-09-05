@@ -43,16 +43,18 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 
 ## Installation
 
-| Package manager | Commands                                                                                                                   |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Homebrew        | `brew install nikhil25803/tap/purrpeek`                                                                                    |
-| Nix             | Install: `nix profile install github:nikhil25803/purrpeek`<br><br>Run: `nix run github:nikhil25803/purrpeek`               |
-| AUR             | Coming soon                                                                                                                |
+## Installation
+
+| Package manager | Commands                                                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Homebrew        | `brew install nikhil25803/tap/purrpeek`                                                                                                           |
+| Nix             | Install: `nix profile install github:nikhil25803/purrpeek`<br><br>Run: `nix run github:nikhil25803/purrpeek`                                      |
 | Scoop           | Setup: `scoop bucket add nikhil25803 https://github.com/nikhil25803/scoop-bucket`<br><br>Install: `scoop install purrpeek`<br><br>Run: `purrpeek` |
-| WinGet          | Coming soon                                                                                                                |
-| Snap            | Coming soon                                                                                                                |
-| Debian          | Coming soon                                                                                                                |
-| Fedora          | Coming soon                                                                                                                |
+| AUR             | Coming soon                                                                                                                                       |
+| WinGet          | Coming soon                                                                                                                                       |
+| Debian          | Coming soon                                                                                                                                       |
+| Fedora          | Coming soon                                                                                                                                       |
+| Snap            | Coming soon                                                                                                                                       |
 
 ## Local setup
 
