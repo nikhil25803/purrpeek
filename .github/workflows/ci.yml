@@ -176,3 +176,31 @@ jobs:
         run: |
           command -v purrpeek
           purrpeek
+  aur:
+    name: AUR Package
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman --disable-sandbox-syscalls -Sy --noconfirm \
+            git \
+            base-devel \
+            namcap
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Create builder user
+        run: |
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Validate PKGBUILD
+        run: |
+          su builder -c "cd '$GITHUB_WORKSPACE/purrpeek-bin' && makepkg --printsrcinfo > .SRCINFO"
+          su builder -c "cd '$GITHUB_WORKSPACE/purrpeek-bin' && namcap PKGBUILD"
+          su builder -c "cd '$GITHUB_WORKSPACE/purrpeek-bin' && makepkg --syncdeps --noconfirm -f"

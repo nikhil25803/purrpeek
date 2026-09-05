@@ -1,0 +1,22 @@
+# Maintainer: Nikhil Raj
+
+pkgname=purrpeek-bin
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Your system information, from a cat's perspective"
+arch=('x86_64')
+url="https://github.com/nikhil25803/purrpeek"
+license=('MIT')
+
+source=(
+  "https://github.com/nikhil25803/purrpeek/releases/download/v${pkgver}/purrpeek_${pkgver}_linux_amd64.tar.gz"
+)
+
+sha256sums=(
+  'bf5a29f7148526fb3d1f3a4769feea986a5d87becd681ebe858a3a5d81244ec0'
+)
+
+package() {
+  install -Dm755 purrpeek "$pkgdir/usr/bin/purrpeek"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
