@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	go build -o debian/purrpeek-build ./cmd/purrpeek
+
+override_dh_auto_install:
+	install -Dm755 debian/purrpeek-build debian/purrpeek/usr/bin/purrpeek
+
+override_dh_auto_clean:
+	dh_clean
+	rm -f debian/purrpeek-build
+
+override_dh_dwz:

@@ -1,0 +1,15 @@
+Source: purrpeek
+Section: utils
+Priority: optional
+Maintainer: Nikhil Raj
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Homepage: https://github.com/nikhil25803/purrpeek
+Rules-Requires-Root: no
+
+Package: purrpeek
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Your system information, from a cat's perspective
+  Purrpeek is a command-line tool that displays system information
+  from a cat's perspective.

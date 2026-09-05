@@ -35,6 +35,19 @@ archives:
     format_overrides:
       - goos: windows
         formats: [zip]
+nfpms:
+  - id: linux-packages
+    package_name: purrpeek
+
+    formats:
+      - deb
+      - rpm
+
+    vendor: Nikhil Raj
+    homepage: https://github.com/nikhil25803/purrpeek
+    maintainer: Nikhil Raj
+    description: Your system information, from a cat's perspective.
+    license: MIT
 
 checksum:
   name_template: "checksums.txt"
