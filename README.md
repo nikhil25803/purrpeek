@@ -26,6 +26,12 @@ Purrpeek is a cross-platform, cat-approved CLI for quickly inspecting your opera
 
 Collection is best-effort: if a system detail is unavailable, Purrpeek still displays everything it collected successfully.
 
+<p align="center">
+  <a href="https://peerlist.io/nikhilraj/project/purrpeek" target="_blank" rel="noreferrer">
+    <img src="https://peerlist.io/api/v1/projects/embed/PRJHGNQODJERP97RD2886AJNN9MKQJ?showUpvote=false&theme=light" alt="Purrpeek on Peerlist" height="72">
+  </a>
+</p>
+
 |                                                   Preview 1                                                    |                                                   Preview 2                                                   |
 | :------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
 |            **Ghostty**<br>![Purrpeek running in Ghostty with Mongo artwork](asset/ss_ghostty_1.png)            |            **Ghostty**<br>![Purrpeek running in Ghostty with Snow artwork](asset/ss_ghostty_2.png)            |
@@ -123,13 +129,13 @@ Run the built executable with `./bin/purrpeek` on macOS/Linux or `bin\purrpeek.e
 
 ## CLI usage
 
-| Command                      | Description                                             |
-| ---------------------------- | ------------------------------------------------------- |
-| `purrpeek`                   | Render artwork and system details.                      |
-| `purrpeek --json`            | Print the complete system report as JSON.               |
-| `purrpeek --verbose`         | Render normally and show collection warnings on stderr. |
-| `purrpeek --json --verbose`  | Print JSON and show collection warnings on stderr.      |
-| `purrpeek --help`            | Show all CLI flags.                                     |
+| Command                     | Description                                             |
+| --------------------------- | ------------------------------------------------------- |
+| `purrpeek`                  | Render artwork and system details.                      |
+| `purrpeek --json`           | Print the complete system report as JSON.               |
+| `purrpeek --verbose`        | Render normally and show collection warnings on stderr. |
+| `purrpeek --json --verbose` | Print JSON and show collection warnings on stderr.      |
+| `purrpeek --help`           | Show all CLI flags.                                     |
 
 Warnings are quiet by default and written to standard error only with `--verbose`, keeping JSON output usable by other tools.
 
@@ -137,25 +143,25 @@ From the repository, use `go run ./cmd/purrpeek` in place of `purrpeek` or run `
 
 ## Development commands
 
-| Command                 | Description                                |
-| ----------------------- | ------------------------------------------ |
-| `./scripts/setup.sh`    | Set up, test, and build on macOS or Linux. |
-| `scripts\setup.bat`     | Set up, test, and build on Windows.        |
-| `make test`             | Run all Go tests.                          |
-| `make run-purrpeek`     | Run Purrpeek from source.                  |
-| `make build-purrpeek`   | Build `bin/purrpeek`.                      |
-| `make build-windows`    | Build `bin/purrpeek.exe` for Windows.      |
+| Command               | Description                                |
+| --------------------- | ------------------------------------------ |
+| `./scripts/setup.sh`  | Set up, test, and build on macOS or Linux. |
+| `scripts\setup.bat`   | Set up, test, and build on Windows.        |
+| `make test`           | Run all Go tests.                          |
+| `make run-purrpeek`   | Run Purrpeek from source.                  |
+| `make build-purrpeek` | Build `bin/purrpeek`.                      |
+| `make build-windows`  | Build `bin/purrpeek.exe` for Windows.      |
 
 ## Package builds
 
 Nix commands require Nix; AUR and Debian commands require Docker.
 
-| Command          | Description                                                  |
-| ---------------- | ------------------------------------------------------------ |
-| `make nix-check` | Validate the flake on all supported systems.                 |
-| `make nix-build` | Build the package with Nix.                                  |
-| `make aur-check` | Build the x86_64 AUR package interactively.                  |
-| `make aur-build` | Build the x86_64 AUR package.                                |
+| Command          | Description                                                    |
+| ---------------- | -------------------------------------------------------------- |
+| `make nix-check` | Validate the flake on all supported systems.                   |
+| `make nix-build` | Build the package with Nix.                                    |
+| `make aur-check` | Build the x86_64 AUR package interactively.                    |
+| `make aur-build` | Build the x86_64 AUR package.                                  |
 | `make deb-build` | Build the amd64 Debian package and place artifacts in `dist/`. |
 
 ## System information
