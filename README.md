@@ -13,11 +13,13 @@
 
 <p align="center">
   <a href="https://github.com/nikhil25803/purrpeek/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/nikhil25803/purrpeek/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/nikhil25803/purrpeek/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/nikhil25803/purrpeek/total?label=downloads&amp;logo=github"></a>
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/go.mod"><img alt="Go 1.26.5" src="https://img.shields.io/badge/Go-1.26.5-00ADD8?logo=go&logoColor=white"></a>
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
   <a href="https://github.com/nikhil25803/homebrew-tap/blob/main/Formula/purrpeek.rb"><img alt="Homebrew available" src="https://img.shields.io/badge/Homebrew-available-FBB040?logo=homebrew&logoColor=black"></a>
   <a href="https://github.com/nikhil25803/purrpeek/blob/main/flake.nix"><img alt="Nix flake available" src="https://img.shields.io/badge/Nix-flake_available-5277C3?logo=nixos&logoColor=white"></a>
   <a href="https://github.com/nikhil25803/scoop-bucket/blob/main/bucket/purrpeek.json"><img alt="Scoop available" src="https://img.shields.io/badge/Scoop-available-53B7F5?logo=windows&logoColor=white"></a>
+  <a href="https://github.com/microsoft/winget-pkgs/tree/master/manifests/n/NikhilRaj/Purrpeek"><img alt="WinGet available" src="https://img.shields.io/badge/WinGet-available-0078D4?logo=windows11&logoColor=white"></a>
   <a href="#linux-installer"><img alt="Linux installer available" src="https://img.shields.io/badge/Linux-installer_available-FCC624?logo=linux&logoColor=black"></a>
   <a href="#installation"><img alt="Debian package coming soon" src="https://img.shields.io/badge/Debian-coming_soon-A81D33?logo=debian&logoColor=white"></a>
 </p>
@@ -63,7 +65,7 @@ Collection is best-effort: if a system detail is unavailable, Purrpeek still dis
 | Nix             | Install: `nix profile install github:nikhil25803/purrpeek`<br><br>Run: `nix run github:nikhil25803/purrpeek`                                      |
 | Scoop           | Setup: `scoop bucket add nikhil25803 https://github.com/nikhil25803/scoop-bucket`<br><br>Install: `scoop install purrpeek`<br><br>Run: `purrpeek` |
 | AUR             | Coming soon                                                                                                                                       |
-| WinGet          | Coming soon                                                                                                                                       |
+| WinGet          | `winget install --exact --id NikhilRaj.Purrpeek`                                                                                                  |
 | Debian          | Coming soon                                                                                                                                       |
 | Fedora          | Coming soon                                                                                                                                       |
 | Snap            | Coming soon                                                                                                                                       |
